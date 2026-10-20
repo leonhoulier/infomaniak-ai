@@ -1,0 +1,1503 @@
+{
+  "catalogue_id": "api.ad7952246be841ae555d",
+  "source": "https://developer.infomaniak.com/docs/api/get/1/mail_hostings/{mail_hosting_id}/mailboxes",
+  "operation": {
+    "method": "get",
+    "uri": "get/1/mail_hostings/{mail_hosting_id}/mailboxes",
+    "path": "https://api.infomaniak.com/1/mail_hostings/{mail_hosting_id}/mailboxes",
+    "meta": {
+      "tags": ["Mailbox management"],
+      "summary": "List mailboxes",
+      "description": "This endpoint allows you to retrieve all the mailboxes for a given mail hosting.",
+      "operationId": "Mail/ServicesListMailboxes",
+      "parameters": [
+        {
+          "description": "The unique identifier (ID) of the mail hosting to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "mail_hosting_id",
+          "in": "path"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "search",
+            "type": "string"
+          },
+          "name": "search",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "filter_by",
+          "in": "query"
+        },
+        {
+          "description": "*Optional* : Allows loading additional data about a resource, which may include related resources.",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "full_name",
+              "authorized_senders",
+              "blocked_senders",
+              "has_auto_responder",
+              "auto_responder",
+              "redirection",
+              "has_move_spam",
+              "aliases",
+              "last_login",
+              "password_last_changed_at",
+              "created_at",
+              "users",
+              "teams",
+              "smtpban",
+              "has_dkim_signature",
+              "is_removable",
+              "auth",
+              "permissions",
+              "has_operation_in_progress",
+              "full_aliases",
+              "mailbox_id",
+              "signature_models",
+              "size",
+              "size_refresh",
+              "has_mail_filtering",
+              "mail_filtering_folder_commercials",
+              "mail_filtering_folder_social_networks",
+              "workspace_security",
+              "count_signatures",
+              "count_mailbox_senders",
+              "count_invitations",
+              "count_devices",
+              "has_legacy_device",
+              "has_multi_password"
+            ]
+          },
+          "x-values": [
+            "full_name",
+            "authorized_senders",
+            "blocked_senders",
+            "has_auto_responder",
+            "auto_responder",
+            "redirection",
+            "has_move_spam",
+            "aliases",
+            "last_login",
+            "password_last_changed_at",
+            "created_at",
+            "users",
+            "teams",
+            "smtpban",
+            "has_dkim_signature",
+            "is_removable",
+            "auth",
+            "permissions",
+            "has_operation_in_progress",
+            "full_aliases",
+            "mailbox_id",
+            "signature_models",
+            "size",
+            "size_refresh",
+            "has_mail_filtering",
+            "mail_filtering_folder_commercials",
+            "mail_filtering_folder_social_networks",
+            "workspace_security",
+            "count_signatures",
+            "count_mailbox_senders",
+            "count_invitations",
+            "count_devices",
+            "has_legacy_device",
+            "has_multi_password"
+          ],
+          "name": "with",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "filter",
+            "maxItems": 99,
+            "type": "object",
+            "properties": {
+              "has_alias": {
+                "title": "has_alias",
+                "type": "boolean"
+              },
+              "has_anti_spam": {
+                "title": "has_anti_spam",
+                "type": "boolean"
+              },
+              "has_redirection": {
+                "title": "has_redirection",
+                "type": "boolean"
+              },
+              "has_responder": {
+                "title": "has_responder",
+                "type": "boolean"
+              },
+              "is_using_imap": {
+                "title": "is_using_imap",
+                "type": "boolean"
+              },
+              "is_using_pop3": {
+                "title": "is_using_pop3",
+                "type": "boolean"
+              },
+              "last_login_at": {
+                "title": "last_login_at",
+                "type": "integer",
+                "description": "Timestamp `{name}` has been logged"
+              }
+            }
+          },
+          "name": "filter",
+          "in": "query"
+        },
+        {
+          "description": "*Optional* :  If you pass this parameter with the value `total`, then the response will be the number of items in the collection, instead of the items themselves.<br />\nPart of the `total` capacity\n",
+          "schema": {
+            "enum": ["total"],
+            "type": "string"
+          },
+          "name": "return",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the number of items to return<br />\nPart of the `offset` capacity\n",
+          "schema": {
+            "type": "integer"
+          },
+          "name": "limit",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the index of the first item to return (0 = first item)<br />\nPart of the `offset` capacity\n",
+          "schema": {
+            "type": "integer"
+          },
+          "name": "skip",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the page number<br />\nPart of the `pagination` capacity\n",
+          "schema": {
+            "description": "*Optional parameter* that define the page number<br />\nPart of the `pagination` capacity\n",
+            "type": "integer",
+            "default": 1
+          },
+          "name": "page",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the number of items per page<br />\nPart of the `pagination` capacity\n",
+          "schema": {
+            "description": "*Optional parameter* that define the number of items per page<br />\nPart of the `pagination` capacity\n",
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": "per_page",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+          "style": "form",
+          "explode": false,
+          "schema": {
+            "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "enum": ["mailIDN", "created_at"]
+          },
+          "name": "order_by",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the default sort order<br />\nPart of the `sort` capacity\n",
+          "schema": {
+            "enum": ["asc", "desc"],
+            "type": "string",
+            "default": "asc"
+          },
+          "name": "order",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+          "style": "deepObject",
+          "explode": true,
+          "schema": {
+            "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+            "type": "object",
+            "enum": ["asc", "desc"]
+          },
+          "name": "order_for",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "enum": ["success", "error", "asynchronous"],
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "title": "Mailbox",
+                          "x-ref": "Mailbox",
+                          "type": "object",
+                          "properties": {
+                            "users": {
+                              "title": "users",
+                              "type": "array",
+                              "items": {
+                                "title": "UserV2",
+                                "x-ref": "UserV2",
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "title": "Unique identifier",
+                                    "type": "integer",
+                                    "description": "Unique identifier of the resource `UserV2`",
+                                    "required": true
+                                  },
+                                  "display_name": {
+                                    "title": "display_name",
+                                    "type": "string",
+                                    "description": "Display name",
+                                    "required": true
+                                  },
+                                  "first_name": {
+                                    "title": "first_name",
+                                    "type": "string",
+                                    "description": "First name",
+                                    "required": true
+                                  },
+                                  "last_name": {
+                                    "title": "last_name",
+                                    "type": "string",
+                                    "description": "Last name",
+                                    "required": true
+                                  },
+                                  "email": {
+                                    "title": "email",
+                                    "type": "string",
+                                    "description": "Email",
+                                    "required": true
+                                  },
+                                  "avatar": {
+                                    "title": "avatar",
+                                    "type": "string",
+                                    "description": "Avatar",
+                                    "required": true
+                                  },
+                                  "is_sso": {
+                                    "title": "is_sso",
+                                    "type": "boolean",
+                                    "required": true
+                                  },
+                                  "permissions_binary": {
+                                    "title": "permissions_binary",
+                                    "type": "integer",
+                                    "x-conditional": true,
+                                    "x-with": ["permissions"]
+                                  },
+                                  "permissions": {
+                                    "title": "Permission on mailbox",
+                                    "x-ref": "Permissiononmailbox",
+                                    "type": "object",
+                                    "properties": {
+                                      "can_manage_filters": {
+                                        "title": "can_manage_filters",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_manage_security": {
+                                        "title": "can_manage_security",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_manage_aliases": {
+                                        "title": "can_manage_aliases",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_manage_redirections": {
+                                        "title": "can_manage_redirections",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_manage_signatures": {
+                                        "title": "can_manage_signatures",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_manage_auto_reply": {
+                                        "title": "can_manage_auto_reply",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_change_password": {
+                                        "title": "can_change_password",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_configure_mail_folders": {
+                                        "title": "can_configure_mail_folders",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_send_emails": {
+                                        "title": "can_send_emails",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_restore_emails": {
+                                        "title": "can_restore_emails",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_manage_rules": {
+                                        "title": "can_manage_rules",
+                                        "type": "boolean",
+                                        "required": true
+                                      },
+                                      "can_access_logs": {
+                                        "title": "can_access_logs",
+                                        "type": "boolean",
+                                        "required": true
+                                      }
+                                    },
+                                    "x-conditional": true,
+                                    "x-with": ["permissions"]
+                                  }
+                                },
+                                "x-conditional": true,
+                                "x-with": ["account_user"]
+                              },
+                              "required": true
+                            },
+                            "mailbox_name": {
+                              "title": "mailbox_name",
+                              "type": "string",
+                              "required": true
+                            },
+                            "mailbox": {
+                              "title": "mailbox",
+                              "type": "string",
+                              "required": true
+                            },
+                            "mailbox_idn": {
+                              "title": "mailbox_idn",
+                              "type": "string",
+                              "required": true
+                            },
+                            "note": {
+                              "title": "note",
+                              "type": "string",
+                              "nullable": true,
+                              "required": true
+                            },
+                            "type": {
+                              "title": "type",
+                              "type": "integer",
+                              "nullable": true,
+                              "required": true
+                            },
+                            "count_signatures": {
+                              "title": "count_signatures",
+                              "type": "integer",
+                              "x-conditional": true,
+                              "x-with": ["count_signatures"]
+                            },
+                            "count_invitations": {
+                              "title": "count_invitations",
+                              "type": "integer",
+                              "x-conditional": true,
+                              "x-with": ["count_invitations"]
+                            },
+                            "count_users": {
+                              "title": "count_users",
+                              "type": "integer",
+                              "x-conditional": true,
+                              "x-with": ["count_users"]
+                            },
+                            "is_limited": {
+                              "title": "is_limited",
+                              "type": "boolean",
+                              "required": true
+                            },
+                            "is_free_mail": {
+                              "title": "is_free_mail",
+                              "type": "boolean",
+                              "required": true
+                            },
+                            "has_auto_responder": {
+                              "title": "has_auto_responder",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["has_auto_responder"]
+                            },
+                            "auto_responder": {
+                              "title": "auto_responder",
+                              "type": "object",
+                              "properties": {
+                                "is_active": {
+                                  "title": "is_active",
+                                  "type": "boolean",
+                                  "description": "Is the resource `Mailbox` active ?",
+                                  "required": true
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["auto_responder"]
+                            },
+                            "has_redirection": {
+                              "title": "has_redirection",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["redirection"]
+                            },
+                            "redirection": {
+                              "title": "redirection",
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "title": "redirection"
+                              },
+                              "x-conditional": true,
+                              "x-with": ["redirection"]
+                            },
+                            "aliases": {
+                              "title": "aliases",
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "title": "aliases",
+                                "description": "List of aliases"
+                              },
+                              "description": "List of aliases",
+                              "x-conditional": true,
+                              "x-with": ["aliases"]
+                            },
+                            "full_aliases": {
+                              "title": "full_aliases",
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "title": "full_aliases"
+                              },
+                              "x-conditional": true,
+                              "x-with": ["full_aliases"]
+                            },
+                            "created_at": {
+                              "title": "created_at",
+                              "type": "integer",
+                              "description": "Timestamp `Mailbox` has been created",
+                              "format": "timestamp",
+                              "x-conditional": true,
+                              "x-with": ["created_at"]
+                            },
+                            "password_last_changed_at": {
+                              "title": "password_last_changed_at",
+                              "type": "integer",
+                              "format": "timestamp",
+                              "x-conditional": true,
+                              "x-with": ["password_last_changed_at"]
+                            },
+                            "size": {
+                              "title": "size",
+                              "type": "integer",
+                              "description": "Display the size of the mailbox, should be displayed when with=size or when with=size_refresh(this activate the recalculation, forced when this was more then 3 months",
+                              "x-optional": true
+                            },
+                            "size_checked_at": {
+                              "title": "size_checked_at",
+                              "type": "integer",
+                              "description": "This indicates the last time the size was calculated by the system. Should be display with the argument with=size_refresh or with=size",
+                              "format": "timestamp",
+                              "x-optional": true
+                            },
+                            "imap_last_login_at": {
+                              "title": "imap_last_login_at",
+                              "type": "integer",
+                              "format": "timestamp",
+                              "x-conditional": true,
+                              "x-with": ["last_login"]
+                            },
+                            "pop3_last_login_at": {
+                              "title": "pop3_last_login_at",
+                              "type": "integer",
+                              "format": "timestamp",
+                              "x-conditional": true
+                            },
+                            "operation_in_progress": {
+                              "title": "operation_in_progress",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["operation_in_progress"]
+                            },
+                            "teams": {
+                              "title": "teams",
+                              "type": "array",
+                              "items": {
+                                "title": "Team",
+                                "x-ref": "Team",
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "title": "Unique identifier",
+                                    "type": "integer",
+                                    "description": "Unique identifier of the resource `Team`",
+                                    "required": true
+                                  },
+                                  "name": {
+                                    "title": "name",
+                                    "type": "string",
+                                    "description": "Name of the resource `Team`",
+                                    "required": true
+                                  },
+                                  "color_id": {
+                                    "title": "color_id",
+                                    "type": "integer",
+                                    "description": "Unique identifier of the `color` of the resource `Team`",
+                                    "required": true
+                                  },
+                                  "owned_by_id": {
+                                    "title": "owned_by_id",
+                                    "type": "integer",
+                                    "description": "Unique identifier of the `user` that owned the resource `Team`",
+                                    "nullable": true,
+                                    "required": true
+                                  },
+                                  "created_by_id": {
+                                    "title": "created_by_id",
+                                    "type": "integer",
+                                    "description": "Unique identifier of the `user` that created the resource `Team`",
+                                    "nullable": true,
+                                    "required": true
+                                  },
+                                  "created_at": {
+                                    "title": "created_at",
+                                    "type": "integer",
+                                    "description": "Timestamp `Team` has been created",
+                                    "format": "timestamp",
+                                    "required": true
+                                  },
+                                  "updated_at": {
+                                    "title": "updated_at",
+                                    "type": "integer",
+                                    "description": "Timestamp `Team` has been updated",
+                                    "format": "timestamp",
+                                    "required": true
+                                  },
+                                  "created_by": {
+                                    "title": "User",
+                                    "x-ref": "User",
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "title": "Unique identifier",
+                                        "type": "integer",
+                                        "description": "Unique identifier of the resource `User`",
+                                        "required": true
+                                      },
+                                      "email": {
+                                        "title": "email",
+                                        "type": "string",
+                                        "description": "Email",
+                                        "required": true
+                                      },
+                                      "firstname": {
+                                        "title": "firstname",
+                                        "type": "string",
+                                        "required": true
+                                      },
+                                      "lastname": {
+                                        "title": "lastname",
+                                        "type": "string",
+                                        "required": true
+                                      },
+                                      "avatarUrl": {
+                                        "title": "avatarUrl",
+                                        "type": "string",
+                                        "required": true
+                                      }
+                                    },
+                                    "x-conditional": true,
+                                    "x-with": ["owned_by"]
+                                  },
+                                  "owned_by": {
+                                    "title": "User",
+                                    "x-ref": "User",
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "title": "Unique identifier",
+                                        "type": "integer",
+                                        "description": "Unique identifier of the resource `User`",
+                                        "required": true
+                                      },
+                                      "email": {
+                                        "title": "email",
+                                        "type": "string",
+                                        "description": "Email",
+                                        "required": true
+                                      },
+                                      "firstname": {
+                                        "title": "firstname",
+                                        "type": "string",
+                                        "required": true
+                                      },
+                                      "lastname": {
+                                        "title": "lastname",
+                                        "type": "string",
+                                        "required": true
+                                      },
+                                      "avatarUrl": {
+                                        "title": "avatarUrl",
+                                        "type": "string",
+                                        "required": true
+                                      }
+                                    },
+                                    "x-conditional": true,
+                                    "x-with": ["owned_by"]
+                                  },
+                                  "user_count": {
+                                    "title": "user_count",
+                                    "type": "integer",
+                                    "description": "User count related to the resource `Team`",
+                                    "x-conditional": true,
+                                    "x-with": ["#users"]
+                                  },
+                                  "product_count": {
+                                    "title": "product_count",
+                                    "type": "integer",
+                                    "description": "Product count related to the resource `Team`",
+                                    "x-conditional": true,
+                                    "x-with": ["#products"]
+                                  },
+                                  "product_by_service_count": {
+                                    "title": "product_by_service_count",
+                                    "type": "integer",
+                                    "description": "Product by service count related to the resource `Team`",
+                                    "x-conditional": true,
+                                    "x-with": ["#products_by_service"]
+                                  }
+                                }
+                              },
+                              "nullable": true,
+                              "x-conditional": true,
+                              "x-with": ["teams"]
+                            },
+                            "has_move_spam": {
+                              "title": "has_move_spam",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["has_move_spam"]
+                            },
+                            "authorized_senders": {
+                              "title": "authorized_senders",
+                              "type": "array",
+                              "items": {
+                                "title": "Listed senders",
+                                "x-ref": "Listedsenders",
+                                "type": "object",
+                                "properties": {
+                                  "email": {
+                                    "title": "email",
+                                    "type": "string",
+                                    "description": "Email",
+                                    "required": true
+                                  },
+                                  "locked": {
+                                    "title": "locked",
+                                    "type": "string",
+                                    "required": true
+                                  }
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["authorized_senders"]
+                            },
+                            "blocked_senders": {
+                              "title": "blocked_senders",
+                              "type": "array",
+                              "items": {
+                                "title": "Listed senders",
+                                "x-ref": "Listedsenders",
+                                "type": "object",
+                                "properties": {
+                                  "email": {
+                                    "title": "email",
+                                    "type": "string",
+                                    "description": "Email",
+                                    "required": true
+                                  },
+                                  "locked": {
+                                    "title": "locked",
+                                    "type": "string",
+                                    "required": true
+                                  }
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["blocked_senders"]
+                            },
+                            "has_dkim_signature": {
+                              "title": "has_dkim_signature",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["has_dkim_signature"]
+                            },
+                            "is_dkim_updatable": {
+                              "title": "is_dkim_updatable",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["is_dkim_updatable"]
+                            },
+                            "has_mail_filtering": {
+                              "title": "has_mail_filtering",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["has_mail_filtering"]
+                            },
+                            "mail_filtering_folder_commercials": {
+                              "title": "mail_filtering_folder_commercials",
+                              "type": "string",
+                              "x-conditional": true,
+                              "x-with": ["mail_filtering_folder_commercials"]
+                            },
+                            "mail_filtering_folder_social_networks": {
+                              "title": "mail_filtering_folder_social_networks",
+                              "type": "string",
+                              "x-conditional": true,
+                              "x-with": ["mail_filtering_folder_social_networks"]
+                            },
+                            "is_auth": {
+                              "title": "is_auth",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["auth"]
+                            },
+                            "is_removable": {
+                              "title": "is_removable",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["is_removable"]
+                            },
+                            "permissions": {
+                              "title": "permissions",
+                              "type": "object",
+                              "properties": {
+                                "has_technical_right": {
+                                  "title": "has_technical_right",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_manage_aliases": {
+                                  "title": "can_manage_aliases",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_manage_redirections": {
+                                  "title": "can_manage_redirections",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_manage_filters": {
+                                  "title": "can_manage_filters",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_manage_security": {
+                                  "title": "can_manage_security",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_manage_signatures": {
+                                  "title": "can_manage_signatures",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_manage_auto_reply": {
+                                  "title": "can_manage_auto_reply",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_change_password": {
+                                  "title": "can_change_password",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_configure_mail_folders": {
+                                  "title": "can_configure_mail_folders",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_send_emails": {
+                                  "title": "can_send_emails",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_restore_emails": {
+                                  "title": "can_restore_emails",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_manage_rules": {
+                                  "title": "can_manage_rules",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_access_logs": {
+                                  "title": "can_access_logs",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "is_linked_to_user": {
+                                  "title": "is_linked_to_user",
+                                  "type": "string",
+                                  "x-conditional": true,
+                                  "x-with": ["permissions"]
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["permissions"]
+                            },
+                            "mailbox_id": {
+                              "title": "mailbox_id",
+                              "type": "integer",
+                              "x-conditional": true,
+                              "x-with": ["mailbox_id"]
+                            },
+                            "is_used_for_account": {
+                              "title": "is_used_for_account",
+                              "type": "string",
+                              "required": true
+                            },
+                            "account_user": {
+                              "title": "UserV2",
+                              "x-ref": "UserV2",
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "title": "Unique identifier",
+                                  "type": "integer",
+                                  "description": "Unique identifier of the resource `UserV2`",
+                                  "required": true
+                                },
+                                "display_name": {
+                                  "title": "display_name",
+                                  "type": "string",
+                                  "description": "Display name",
+                                  "required": true
+                                },
+                                "first_name": {
+                                  "title": "first_name",
+                                  "type": "string",
+                                  "description": "First name",
+                                  "required": true
+                                },
+                                "last_name": {
+                                  "title": "last_name",
+                                  "type": "string",
+                                  "description": "Last name",
+                                  "required": true
+                                },
+                                "email": {
+                                  "title": "email",
+                                  "type": "string",
+                                  "description": "Email",
+                                  "required": true
+                                },
+                                "avatar": {
+                                  "title": "avatar",
+                                  "type": "string",
+                                  "description": "Avatar",
+                                  "required": true
+                                },
+                                "is_sso": {
+                                  "title": "is_sso",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "permissions_binary": {
+                                  "title": "permissions_binary",
+                                  "type": "integer",
+                                  "x-conditional": true,
+                                  "x-with": ["permissions"]
+                                },
+                                "permissions": {
+                                  "title": "Permission on mailbox",
+                                  "x-ref": "Permissiononmailbox",
+                                  "type": "object",
+                                  "properties": {
+                                    "can_manage_filters": {
+                                      "title": "can_manage_filters",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_manage_security": {
+                                      "title": "can_manage_security",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_manage_aliases": {
+                                      "title": "can_manage_aliases",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_manage_redirections": {
+                                      "title": "can_manage_redirections",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_manage_signatures": {
+                                      "title": "can_manage_signatures",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_manage_auto_reply": {
+                                      "title": "can_manage_auto_reply",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_change_password": {
+                                      "title": "can_change_password",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_configure_mail_folders": {
+                                      "title": "can_configure_mail_folders",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_send_emails": {
+                                      "title": "can_send_emails",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_restore_emails": {
+                                      "title": "can_restore_emails",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_manage_rules": {
+                                      "title": "can_manage_rules",
+                                      "type": "boolean",
+                                      "required": true
+                                    },
+                                    "can_access_logs": {
+                                      "title": "can_access_logs",
+                                      "type": "boolean",
+                                      "required": true
+                                    }
+                                  },
+                                  "x-conditional": true,
+                                  "x-with": ["permissions"]
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["account_user"]
+                            },
+                            "external_mail_flag_enabled": {
+                              "title": "external_mail_flag_enabled",
+                              "type": "string",
+                              "description": "Indicates if the mailbox has the option to mark mail from external provider activated",
+                              "nullable": true,
+                              "x-conditional": true,
+                              "x-with": ["external_mail_flag_enabled"]
+                            },
+                            "smtpban_bounce": {
+                              "title": "smtpban_bounce",
+                              "type": "string",
+                              "x-conditional": true,
+                              "x-with": ["smtpban"]
+                            },
+                            "smtpban_auth": {
+                              "title": "smtpban_auth",
+                              "type": "string",
+                              "x-conditional": true
+                            },
+                            "smtpban_url": {
+                              "title": "smtpban_url",
+                              "type": "string",
+                              "nullable": true,
+                              "x-conditional": true,
+                              "x-with": ["smtpban"]
+                            },
+                            "private": {
+                              "title": "private",
+                              "type": "object",
+                              "properties": [],
+                              "required": true
+                            },
+                            "count_devices": {
+                              "title": "count_devices",
+                              "type": "integer",
+                              "x-conditional": true,
+                              "x-with": ["count_devices"]
+                            },
+                            "has_legacy_device": {
+                              "title": "has_legacy_device",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["has_legacy_device"]
+                            },
+                            "has_multi_password": {
+                              "title": "has_multi_password",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["has_multi_password"]
+                            },
+                            "access_rights": {
+                              "title": "access_rights",
+                              "type": "object",
+                              "properties": {
+                                "can_create_webmail_access": {
+                                  "title": "can_create_webmail_access",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_create_device": {
+                                  "title": "can_create_device",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_delete_device_legacy": {
+                                  "title": "can_delete_device_legacy",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_regenerate_device_legacy": {
+                                  "title": "can_regenerate_device_legacy",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_ask_reset_password": {
+                                  "title": "can_ask_reset_password",
+                                  "type": "boolean",
+                                  "required": true
+                                },
+                                "can_create_webmail_access_for_login": {
+                                  "title": "can_create_webmail_access_for_login",
+                                  "type": "boolean",
+                                  "x-conditional": true,
+                                  "x-with": ["account_user"]
+                                },
+                                "can_list_users": {
+                                  "title": "can_list_users",
+                                  "type": "boolean",
+                                  "required": true
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["access_rights"]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "integer",
+                        "description": "Total number of items\nAdded when using query parameter `page`\n"
+                      },
+                      "page": {
+                        "type": "integer",
+                        "description": "Number of the current page\nAdded when using query parameter `page`\n"
+                      },
+                      "pages": {
+                        "type": "integer",
+                        "description": "Total number of pages\nAdded when using query parameter `page`\n"
+                      },
+                      "items_per_page": {
+                        "type": "integer",
+                        "description": "Number of items per page\nAdded when using query parameter `page`\n"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 404",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["object_not_found"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>object_not_found</strong>: Triggered when the asked entity is not accessible.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "x-version": 1,
+      "x-category": "Mail Services",
+      "x-subCategory": "Mailbox management",
+      "x-visible": true,
+      "x-capabilities": [
+        {
+          "name": "countable",
+          "description": "Give the total number of records\n",
+          "values": []
+        },
+        {
+          "name": "offsetable",
+          "description": "Limit a request's results and define from which item you want the results\n",
+          "values": []
+        },
+        {
+          "name": "paginable",
+          "description": "Group a request's items in pages and define which page you want to display\n",
+          "values": []
+        },
+        {
+          "name": "sortable",
+          "values": []
+        }
+      ],
+      "x-scopes": ["mail"],
+      "x-badges": [],
+      "x-paginable": true,
+      "x-sortable": true,
+      "x-auth-user": true,
+      "queryParameters": [
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "search",
+            "type": "string"
+          },
+          "name": "search",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "filter_by",
+          "in": "query"
+        },
+        {
+          "description": "*Optional* : Allows loading additional data about a resource, which may include related resources.",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "full_name",
+              "authorized_senders",
+              "blocked_senders",
+              "has_auto_responder",
+              "auto_responder",
+              "redirection",
+              "has_move_spam",
+              "aliases",
+              "last_login",
+              "password_last_changed_at",
+              "created_at",
+              "users",
+              "teams",
+              "smtpban",
+              "has_dkim_signature",
+              "is_removable",
+              "auth",
+              "permissions",
+              "has_operation_in_progress",
+              "full_aliases",
+              "mailbox_id",
+              "signature_models",
+              "size",
+              "size_refresh",
+              "has_mail_filtering",
+              "mail_filtering_folder_commercials",
+              "mail_filtering_folder_social_networks",
+              "workspace_security",
+              "count_signatures",
+              "count_mailbox_senders",
+              "count_invitations",
+              "count_devices",
+              "has_legacy_device",
+              "has_multi_password"
+            ]
+          },
+          "x-values": [
+            "full_name",
+            "authorized_senders",
+            "blocked_senders",
+            "has_auto_responder",
+            "auto_responder",
+            "redirection",
+            "has_move_spam",
+            "aliases",
+            "last_login",
+            "password_last_changed_at",
+            "created_at",
+            "users",
+            "teams",
+            "smtpban",
+            "has_dkim_signature",
+            "is_removable",
+            "auth",
+            "permissions",
+            "has_operation_in_progress",
+            "full_aliases",
+            "mailbox_id",
+            "signature_models",
+            "size",
+            "size_refresh",
+            "has_mail_filtering",
+            "mail_filtering_folder_commercials",
+            "mail_filtering_folder_social_networks",
+            "workspace_security",
+            "count_signatures",
+            "count_mailbox_senders",
+            "count_invitations",
+            "count_devices",
+            "has_legacy_device",
+            "has_multi_password"
+          ],
+          "name": "with",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "filter",
+            "maxItems": 99,
+            "type": "object",
+            "properties": {
+              "has_alias": {
+                "title": "has_alias",
+                "type": "boolean"
+              },
+              "has_anti_spam": {
+                "title": "has_anti_spam",
+                "type": "boolean"
+              },
+              "has_redirection": {
+                "title": "has_redirection",
+                "type": "boolean"
+              },
+              "has_responder": {
+                "title": "has_responder",
+                "type": "boolean"
+              },
+              "is_using_imap": {
+                "title": "is_using_imap",
+                "type": "boolean"
+              },
+              "is_using_pop3": {
+                "title": "is_using_pop3",
+                "type": "boolean"
+              },
+              "last_login_at": {
+                "title": "last_login_at",
+                "type": "integer",
+                "description": "Timestamp `{name}` has been logged"
+              }
+            }
+          },
+          "name": "filter",
+          "in": "query"
+        },
+        {
+          "description": "*Optional* :  If you pass this parameter with the value `total`, then the response will be the number of items in the collection, instead of the items themselves.<br />\nPart of the `total` capacity\n",
+          "schema": {
+            "enum": ["total"],
+            "type": "string"
+          },
+          "name": "return",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the number of items to return<br />\nPart of the `offset` capacity\n",
+          "schema": {
+            "type": "integer"
+          },
+          "name": "limit",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the index of the first item to return (0 = first item)<br />\nPart of the `offset` capacity\n",
+          "schema": {
+            "type": "integer"
+          },
+          "name": "skip",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the page number<br />\nPart of the `pagination` capacity\n",
+          "schema": {
+            "description": "*Optional parameter* that define the page number<br />\nPart of the `pagination` capacity\n",
+            "type": "integer",
+            "default": 1
+          },
+          "name": "page",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the number of items per page<br />\nPart of the `pagination` capacity\n",
+          "schema": {
+            "description": "*Optional parameter* that define the number of items per page<br />\nPart of the `pagination` capacity\n",
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": "per_page",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+          "style": "form",
+          "explode": false,
+          "schema": {
+            "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "enum": ["mailIDN", "created_at"]
+          },
+          "name": "order_by",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the default sort order<br />\nPart of the `sort` capacity\n",
+          "schema": {
+            "enum": ["asc", "desc"],
+            "type": "string",
+            "default": "asc"
+          },
+          "name": "order",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+          "style": "deepObject",
+          "explode": true,
+          "schema": {
+            "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+            "type": "object",
+            "enum": ["asc", "desc"]
+          },
+          "name": "order_for",
+          "in": "query"
+        }
+      ],
+      "pathParameters": [
+        {
+          "description": "The unique identifier (ID) of the mail hosting to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "mail_hosting_id",
+          "in": "path"
+        }
+      ],
+      "headerParameters": [],
+      "x-codeSamples": [
+        {
+          "lang": "Curl",
+          "label": "Curl",
+          "source": "curl -G \\\n -H \"Authorization: Bearer YOUR-TOKEN-HERE\" \\\n -H \"Content-Type: application/json\" \\\n'https://api.infomaniak.com/1/mail_hostings/{mail_hosting_id}/mailboxes'\n"
+        }
+      ],
+      "x-is-beta": false,
+      "x-is-public-cloud": false
+    }
+  }
+}

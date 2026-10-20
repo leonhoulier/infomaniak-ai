@@ -1,0 +1,294 @@
+{
+  "catalogue_id": "api.7a0eba4581dd55a2d1b7",
+  "source": "https://developer.infomaniak.com/docs/api/put/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses",
+  "operation": {
+    "method": "put",
+    "uri": "put/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses",
+    "path": "https://api.infomaniak.com/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses",
+    "meta": {
+      "tags": ["Mailboxes > Forwarding"],
+      "summary": "Update a forwarding",
+      "description": "Update a given mailbox forwarding.",
+      "operationId": "Mail/ServicesUpdateAForwarding",
+      "parameters": [
+        {
+          "description": "The unique identifier (ID) of the mail hosting to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "mail_hosting_id",
+          "in": "path"
+        },
+        {
+          "description": "The username (that is the part before the @) of the email address you want to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "mailbox_name",
+          "in": "path"
+        }
+      ],
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "title": "Request body",
+              "type": "object",
+              "properties": {
+                "has_dont_deliver": {
+                  "title": null,
+                  "type": "boolean",
+                  "description": "Indicates if the mailbox should delete emails locally after forwarding them",
+                  "required": false
+                },
+                "has_forward_spam": {
+                  "title": null,
+                  "type": "boolean",
+                  "description": "Indicates if the mailbox should forward mail that are considered to be spam",
+                  "required": false
+                },
+                "is_enabled": {
+                  "title": null,
+                  "type": "boolean",
+                  "description": "Indicates if the redirection is enabled on the mailbox.\\n Warning: setting it to false drop all the existing adresses",
+                  "required": false
+                },
+                "redirect_addresses": {
+                  "title": null,
+                  "maxItems": 100,
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "title": "item",
+                    "type": "string"
+                  },
+                  "description": "List of the redirection addresses where the mail are redirected in the mailbox, the maximum is set to 1 if you have a starter pack",
+                  "required": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "enum": ["success", "error", "asynchronous"],
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Too much redirections",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": [
+                              "redirect_address_alias_or_mailboxname",
+                              "too_much_redirections"
+                            ],
+                            "type": "string",
+                            "description": "Error code"
+                          },
+                          "description": {
+                            "enum": [
+                              "Redirect address alias or mailboxname",
+                              "Too much redirections"
+                            ],
+                            "type": "string",
+                            "description": "Description of the error"
+                          }
+                        },
+                        "description": "Error object"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 404",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["object_not_found"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>object_not_found</strong>: Triggered when the asked entity is not accessible.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 500",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["cannot_update_object"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>cannot_update_object</strong>: Triggered when the entity cannot be updated.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "x-version": 1,
+      "x-category": "Mail Services",
+      "x-subCategory": "Mailboxes > Forwarding",
+      "x-visible": true,
+      "x-scopes": ["mail"],
+      "x-badges": [],
+      "x-auth-user": true,
+      "queryParameters": [],
+      "pathParameters": [
+        {
+          "description": "The unique identifier (ID) of the mail hosting to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "mail_hosting_id",
+          "in": "path"
+        },
+        {
+          "description": "The username (that is the part before the @) of the email address you want to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "mailbox_name",
+          "in": "path"
+        }
+      ],
+      "headerParameters": [],
+      "x-codeSamples": [
+        {
+          "lang": "Curl",
+          "label": "Curl",
+          "source": " curl -X PUT \\\n -H \"Authorization: Bearer YOUR-TOKEN-HERE\" \\\n -H \"Content-Type: application/json\" \\\n -d '{\n    \"has_dont_deliver\": false,\n    \"has_forward_spam\": true,\n    \"is_enabled\": true,\n    \"redirect_addresses\": [\n        \"example\"\n    ]\n}' \\\n'https://api.infomaniak.com/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses'\n"
+        }
+      ],
+      "x-is-beta": false,
+      "x-is-public-cloud": false
+    }
+  }
+}

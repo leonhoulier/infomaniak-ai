@@ -1,0 +1,181 @@
+{
+  "catalogue_id": "api.d3a66f7dd8fc2d54aceb",
+  "source": "https://developer.infomaniak.com/docs/api/get/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/aliases",
+  "operation": {
+    "method": "get",
+    "uri": "get/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/aliases",
+    "path": "https://api.infomaniak.com/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/aliases",
+    "meta": {
+      "tags": ["Mailboxes > Aliases"],
+      "summary": "List aliases",
+      "description": "This endpoint allows you to retrieve all the aliases for a given mailbox.",
+      "operationId": "Mail/ServicesListAliases",
+      "parameters": [
+        {
+          "description": "The unique identifier (ID) of the mail hosting to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "mail_hosting_id",
+          "in": "path"
+        },
+        {
+          "description": "The username (that is the part before the @) of the email address you want to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "mailbox_name",
+          "in": "path"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "enum": ["success", "error", "asynchronous"],
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "title": "Mailbox Aliases",
+                        "x-ref": "MailboxAliases",
+                        "type": "object",
+                        "properties": {
+                          "enabled_alias": {
+                            "title": "enabled_alias",
+                            "type": "integer",
+                            "required": true
+                          },
+                          "aliases": {
+                            "title": "aliases",
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "title": "aliases",
+                              "description": "The list of a aliases of the mailbox."
+                            },
+                            "description": "The list of a aliases of the mailbox.",
+                            "required": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 404",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["object_not_found"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>object_not_found</strong>: Triggered when the asked entity is not accessible.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "x-version": 1,
+      "x-category": "Mail Services",
+      "x-subCategory": "Mailboxes > Aliases",
+      "x-visible": true,
+      "x-scopes": ["mail"],
+      "x-badges": [],
+      "x-auth-user": true,
+      "queryParameters": [],
+      "pathParameters": [
+        {
+          "description": "The unique identifier (ID) of the mail hosting to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "mail_hosting_id",
+          "in": "path"
+        },
+        {
+          "description": "The username (that is the part before the @) of the email address you want to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "mailbox_name",
+          "in": "path"
+        }
+      ],
+      "headerParameters": [],
+      "x-codeSamples": [
+        {
+          "lang": "Curl",
+          "label": "Curl",
+          "source": "curl -G \\\n -H \"Authorization: Bearer YOUR-TOKEN-HERE\" \\\n -H \"Content-Type: application/json\" \\\n'https://api.infomaniak.com/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/aliases'\n"
+        }
+      ],
+      "x-is-beta": false,
+      "x-is-public-cloud": false
+    }
+  }
+}

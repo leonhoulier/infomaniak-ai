@@ -1,0 +1,260 @@
+{
+  "catalogue_id": "api.81b94c1958a86d89271c",
+  "source": "https://developer.infomaniak.com/docs/api/post/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses",
+  "operation": {
+    "method": "post",
+    "uri": "post/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses",
+    "path": "https://api.infomaniak.com/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses",
+    "meta": {
+      "tags": ["Mailboxes > Forwarding"],
+      "summary": "Add a forwarding",
+      "description": "Adds a new forwarding address to the given mailbox",
+      "operationId": "Mail/ServicesAddAForwarding",
+      "parameters": [
+        {
+          "description": "The unique identifier (ID) of the mail hosting to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "mail_hosting_id",
+          "in": "path"
+        },
+        {
+          "description": "The username (that is the part before the @) of the email address you want to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "mailbox_name",
+          "in": "path"
+        }
+      ],
+      "requestBody": {
+        "description": "Request body of the called URI",
+        "content": {
+          "application/json": {
+            "schema": {
+              "title": "Request body",
+              "type": "object",
+              "properties": {
+                "redirect_address": {
+                  "title": null,
+                  "type": "string",
+                  "description": "Redirect address",
+                  "required": true
+                }
+              }
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "description": "Created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "enum": ["success", "error", "asynchronous"],
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "title": "Create Forwarding Response",
+                        "x-ref": "CreateForwardingResponse",
+                        "type": "object",
+                        "properties": {
+                          "email": {
+                            "title": "email",
+                            "type": "string",
+                            "description": "Email where the emails are sent",
+                            "required": true
+                          },
+                          "email_idn": {
+                            "title": "email_idn",
+                            "type": "string",
+                            "description": "Mail with special character like é or other",
+                            "required": true
+                          },
+                          "has_dont_deliver": {
+                            "title": "has_dont_deliver",
+                            "type": "boolean",
+                            "description": "Indicates if the mailbox should delete emails locally after forwarding them",
+                            "required": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Cannot get redirections addresses",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": [
+                              "cannot_add_redirection",
+                              "cannot_get_redirections_addresses",
+                              "cannot_set_redirection_keep",
+                              "incorrect_redirect_address",
+                              "max_mailbox_redirection",
+                              "redirect_address_already_exists"
+                            ],
+                            "type": "string",
+                            "description": "Error code"
+                          },
+                          "description": {
+                            "enum": [
+                              "Cannot add redirection",
+                              "Cannot get redirections addresses",
+                              "Cannot set redirection keep",
+                              "Incorrect redirect address",
+                              "Max mailbox redirection",
+                              "Redirect address already exists"
+                            ],
+                            "type": "string",
+                            "description": "Description of the error"
+                          }
+                        },
+                        "description": "Error object"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 404",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["object_not_found"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>object_not_found</strong>: Triggered when the asked entity is not accessible.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "x-version": 1,
+      "x-category": "Mail Services",
+      "x-subCategory": "Mailboxes > Forwarding",
+      "x-visible": true,
+      "x-scopes": ["mail"],
+      "x-badges": [],
+      "x-auth-user": true,
+      "queryParameters": [],
+      "pathParameters": [
+        {
+          "description": "The unique identifier (ID) of the mail hosting to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "mail_hosting_id",
+          "in": "path"
+        },
+        {
+          "description": "The username (that is the part before the @) of the email address you want to request.",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "mailbox_name",
+          "in": "path"
+        }
+      ],
+      "headerParameters": [],
+      "x-codeSamples": [
+        {
+          "lang": "Curl",
+          "label": "Curl",
+          "source": " curl -X POST \\\n -H \"Authorization: Bearer YOUR-TOKEN-HERE\" \\\n -H \"Content-Type: application/json\" \\\n -d '{\n    \"redirect_address\": \"example\"\n}' \\\n'https://api.infomaniak.com/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses'\n"
+        }
+      ],
+      "x-is-beta": false,
+      "x-is-public-cloud": false
+    }
+  }
+}

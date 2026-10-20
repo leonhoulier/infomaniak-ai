@@ -1,0 +1,970 @@
+{
+  "catalogue_id": "api.ca59ec94bf7652ceaac8",
+  "source": "https://developer.infomaniak.com/docs/api/get/1/products",
+  "operation": {
+    "method": "get",
+    "uri": "get/1/products",
+    "path": "https://api.infomaniak.com/1/products",
+    "meta": {
+      "tags": ["Products"],
+      "summary": "List products",
+      "description": "This endpoint allows you to retrieve all the products where the current user's has at least one right.",
+      "parameters": [
+        {
+          "description": "*Optional* : Allows loading additional data about a resource, which may include related resources.",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string",
+            "enum": ["fqdn"]
+          },
+          "x-values": ["fqdn"],
+          "name": "with",
+          "in": "query"
+        },
+        {
+          "description": "The account identifier",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "account_id",
+            "type": "integer",
+            "description": "Unique identifier of the `account` that is related to the resource `{name}`"
+          },
+          "name": "account_id",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "customer_name",
+            "type": "string",
+            "description": "Customer name of the resource `{name}`"
+          },
+          "name": "customer_name",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "fqdn",
+            "type": "string"
+          },
+          "name": "fqdn",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "internal_name",
+            "type": "string"
+          },
+          "name": "internal_name",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "product_id",
+            "type": "integer",
+            "description": "Unique identifier of the `product` that is related to the resource `{name}`"
+          },
+          "name": "product_id",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "service_id",
+            "enum": [
+              1, 2, 3, 4, 6, 7, 10, 14, 15, 18, 23, 25, 26, 29, 30, 31, 34, 35, 37, 40, 43, 48, 50,
+              52, 58
+            ],
+            "type": "integer",
+            "description": "Unique identifier of the `service` that is related to the resource `{name}`"
+          },
+          "name": "service_id",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "service_name",
+            "enum": [
+              "ai_tools",
+              "backup",
+              "certificate",
+              "cloud",
+              "cloud_hd",
+              "custom_url",
+              "dedicated_server",
+              "domain",
+              "drive",
+              "e_ticketing",
+              "email_hosting",
+              "hosting",
+              "housing",
+              "invitation",
+              "jelastic",
+              "ksuite",
+              "mailing",
+              "nas",
+              "public_cloud",
+              "radio",
+              "swiss_backup",
+              "video",
+              "vod",
+              "web_hosting",
+              "website_builder"
+            ],
+            "type": "string",
+            "description": "Name of the service"
+          },
+          "name": "service_name",
+          "in": "query"
+        },
+        {
+          "description": "*Optional* :  If you pass this parameter with the value `total`, then the response will be the number of items in the collection, instead of the items themselves.<br />\nPart of the `total` capacity\n",
+          "schema": {
+            "enum": ["total"],
+            "type": "string"
+          },
+          "name": "return",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the number of items to return<br />\nPart of the `offset` capacity\n",
+          "schema": {
+            "type": "integer"
+          },
+          "name": "limit",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the index of the first item to return (0 = first item)<br />\nPart of the `offset` capacity\n",
+          "schema": {
+            "type": "integer"
+          },
+          "name": "skip",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the page number<br />\nPart of the `pagination` capacity\n",
+          "schema": {
+            "description": "*Optional parameter* that define the page number<br />\nPart of the `pagination` capacity\n",
+            "type": "integer",
+            "default": 1
+          },
+          "name": "page",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the number of items per page<br />\nPart of the `pagination` capacity\n",
+          "schema": {
+            "description": "*Optional parameter* that define the number of items per page<br />\nPart of the `pagination` capacity\n",
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": "per_page",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+          "style": "form",
+          "explode": false,
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "name": "order_by",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the default sort order<br />\nPart of the `sort` capacity\n",
+          "schema": {
+            "enum": ["asc", "desc"],
+            "type": "string",
+            "default": "asc"
+          },
+          "name": "order",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+          "style": "deepObject",
+          "explode": true,
+          "schema": {
+            "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+            "type": "object",
+            "enum": ["asc", "desc"]
+          },
+          "name": "order_for",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "enum": ["success", "error", "asynchronous"],
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "title": "Product",
+                          "x-ref": "Product",
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "title": "Unique identifier",
+                              "type": "integer",
+                              "description": "Unique identifier of the resource `Product`",
+                              "required": true
+                            },
+                            "account_id": {
+                              "title": "account_id",
+                              "type": "integer",
+                              "description": "Unique identifier of the `account` that is related to the resource `Product`",
+                              "required": true
+                            },
+                            "service_id": {
+                              "title": "service_id",
+                              "type": "integer",
+                              "description": "Unique identifier of the `service` that is related to the resource `Product`",
+                              "required": true
+                            },
+                            "service_name": {
+                              "title": "service_name",
+                              "type": "string",
+                              "description": "Name of the service",
+                              "required": true
+                            },
+                            "customer_name": {
+                              "title": "customer_name",
+                              "type": "string",
+                              "description": "Customer name of the resource `Product`",
+                              "required": true
+                            },
+                            "internal_name": {
+                              "title": "internal_name",
+                              "type": "string",
+                              "nullable": true,
+                              "required": true
+                            },
+                            "created_at": {
+                              "title": "created_at",
+                              "type": "integer",
+                              "description": "Timestamp `Product` has been created",
+                              "format": "timestamp",
+                              "required": true
+                            },
+                            "expired_at": {
+                              "title": "expired_at",
+                              "type": "integer",
+                              "description": "Timestamp `Product` has expired",
+                              "format": "timestamp",
+                              "nullable": true,
+                              "required": true
+                            },
+                            "deleted_at": {
+                              "title": "deleted_at",
+                              "type": "integer",
+                              "description": "Timestamp `Product` has been deleted",
+                              "format": "timestamp",
+                              "x-optional": true
+                            },
+                            "version": {
+                              "title": "version",
+                              "type": "integer",
+                              "required": true
+                            },
+                            "has_maintenance": {
+                              "title": "has_maintenance",
+                              "type": "boolean",
+                              "description": "Does the resource `Product` have a maintenance mode enabled?",
+                              "required": true
+                            },
+                            "is_locked": {
+                              "title": "is_locked",
+                              "type": "boolean",
+                              "description": "Is the resource `Product` locked?",
+                              "required": true
+                            },
+                            "has_operation_in_progress": {
+                              "title": "has_operation_in_progress",
+                              "type": "boolean",
+                              "description": "Does the resource `Product` have an operation in progress ?",
+                              "required": true
+                            },
+                            "tags": {
+                              "title": "tags",
+                              "type": "array",
+                              "items": {
+                                "title": "Tag",
+                                "x-ref": "Tag",
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "title": "Unique identifier",
+                                    "type": "integer",
+                                    "description": "Unique identifier of the resource `Tag`",
+                                    "required": true
+                                  },
+                                  "name": {
+                                    "title": "name",
+                                    "type": "string",
+                                    "description": "Name of the resource `Tag`",
+                                    "required": true
+                                  },
+                                  "color": {
+                                    "title": "color",
+                                    "type": "integer",
+                                    "required": true
+                                  },
+                                  "product_count": {
+                                    "title": "product_count",
+                                    "type": "integer",
+                                    "description": "Product count related to the resource `Tag`",
+                                    "x-conditional": true,
+                                    "x-with": ["#products"]
+                                  }
+                                }
+                              },
+                              "required": true
+                            },
+                            "unique_id": {
+                              "title": "unique_id",
+                              "type": "integer",
+                              "description": "Unique identifier of the resource `Product`",
+                              "required": true
+                            },
+                            "description": {
+                              "title": "description",
+                              "type": "string",
+                              "description": "Description of the resource `Product`",
+                              "x-optional": true
+                            },
+                            "bill_reference": {
+                              "title": "bill_reference",
+                              "type": "string",
+                              "x-optional": true
+                            },
+                            "is_free": {
+                              "title": "is_free",
+                              "type": "boolean",
+                              "description": "Does the resource `Product` have a free price status?",
+                              "required": true
+                            },
+                            "is_zero_price": {
+                              "title": "is_zero_price",
+                              "type": "boolean",
+                              "description": "Does the resource `Product` have a zero price status?",
+                              "required": true
+                            },
+                            "is_trial": {
+                              "title": "is_trial",
+                              "type": "boolean",
+                              "description": "Does the resource `Product` have a trial status?",
+                              "required": true
+                            },
+                            "rights": {
+                              "title": "Right",
+                              "x-ref": "Right",
+                              "type": "object",
+                              "properties": {
+                                "technical": {
+                                  "title": "technical",
+                                  "type": "boolean",
+                                  "x-optional": true
+                                },
+                                "statistic": {
+                                  "title": "statistic",
+                                  "type": "boolean",
+                                  "x-optional": true
+                                },
+                                "check": {
+                                  "title": "check",
+                                  "type": "boolean",
+                                  "x-optional": true
+                                },
+                                "sale": {
+                                  "title": "sale",
+                                  "type": "boolean",
+                                  "x-optional": true
+                                }
+                              },
+                              "required": true
+                            },
+                            "parent_id": {
+                              "title": "parent_id",
+                              "type": "integer",
+                              "x-optional": true
+                            },
+                            "parent_service_id": {
+                              "title": "parent_service_id",
+                              "type": "integer",
+                              "x-optional": true
+                            },
+                            "parent_service_name": {
+                              "title": "parent_service_name",
+                              "type": "string",
+                              "x-optional": true
+                            },
+                            "status": {
+                              "title": "status",
+                              "type": "string",
+                              "description": "Status of the resource `Product`",
+                              "x-conditional": true,
+                              "x-with": ["status"]
+                            },
+                            "users": {
+                              "title": "users",
+                              "type": "array",
+                              "items": {
+                                "title": "ProductUser",
+                                "x-ref": "ProductUser",
+                                "type": "object",
+                                "properties": {
+                                  "user_id": {
+                                    "title": "user_id",
+                                    "type": "integer",
+                                    "required": true
+                                  },
+                                  "rights": {
+                                    "title": "Right",
+                                    "x-ref": "Right",
+                                    "type": "object",
+                                    "properties": {
+                                      "technical": {
+                                        "title": "technical",
+                                        "type": "boolean",
+                                        "x-optional": true
+                                      },
+                                      "statistic": {
+                                        "title": "statistic",
+                                        "type": "boolean",
+                                        "x-optional": true
+                                      },
+                                      "check": {
+                                        "title": "check",
+                                        "type": "boolean",
+                                        "x-optional": true
+                                      },
+                                      "sale": {
+                                        "title": "sale",
+                                        "type": "boolean",
+                                        "x-optional": true
+                                      }
+                                    },
+                                    "required": true
+                                  }
+                                }
+                              },
+                              "x-optional": true,
+                              "x-conditional": true,
+                              "x-scopes": ["users"],
+                              "x-with": ["users"]
+                            },
+                            "teams": {
+                              "title": "teams",
+                              "type": "string",
+                              "x-optional": true,
+                              "x-conditional": true,
+                              "x-scopes": ["users"],
+                              "x-with": ["teams"]
+                            },
+                            "admin": {
+                              "title": "ProductAdminUser",
+                              "x-ref": "ProductAdminUser",
+                              "type": "object",
+                              "properties": {
+                                "user_id": {
+                                  "title": "user_id",
+                                  "type": "integer",
+                                  "required": true
+                                },
+                                "email": {
+                                  "title": "email",
+                                  "type": "string",
+                                  "description": "Email",
+                                  "required": true
+                                },
+                                "display_name": {
+                                  "title": "display_name",
+                                  "type": "string",
+                                  "description": "Display name",
+                                  "required": true
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["users"]
+                            },
+                            "fqdn": {
+                              "title": "fqdn",
+                              "type": "string",
+                              "x-conditional": true,
+                              "x-with": ["fqdn"]
+                            },
+                            "is_managed_by_partner": {
+                              "title": "is_managed_by_partner",
+                              "type": "boolean",
+                              "x-optional": true
+                            },
+                            "flags": {
+                              "title": "flags",
+                              "type": "array",
+                              "x-conditional": true,
+                              "x-with": ["flags"]
+                            },
+                            "renew_preferences": {
+                              "title": "renew_preferences",
+                              "type": "array",
+                              "x-conditional": true,
+                              "x-with": ["renew"]
+                            },
+                            "is_transferable": {
+                              "title": "is_transferable",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["transfer"]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "integer",
+                        "description": "Total number of items\nAdded when using query parameter `page`\n"
+                      },
+                      "page": {
+                        "type": "integer",
+                        "description": "Number of the current page\nAdded when using query parameter `page`\n"
+                      },
+                      "pages": {
+                        "type": "integer",
+                        "description": "Total number of pages\nAdded when using query parameter `page`\n"
+                      },
+                      "items_per_page": {
+                        "type": "integer",
+                        "description": "Number of items per page\nAdded when using query parameter `page`\n"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 401",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["not_authorized"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>not_authorized</strong>: Triggered when the user is not authorized to access this resource.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 404",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["object_not_found"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>object_not_found</strong>: Triggered when the asked entity is not accessible.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 500",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["unexpected_error"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>unexpected_error</strong>: Triggered when something unknown happens.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "x-version": 1,
+      "x-category": "Core Resources",
+      "x-subCategory": "Products",
+      "x-visible": true,
+      "x-capabilities": [
+        {
+          "name": "countable",
+          "description": "Give the total number of records\n",
+          "values": []
+        },
+        {
+          "name": "offsetable",
+          "description": "Limit a request's results and define from which item you want the results\n",
+          "values": []
+        },
+        {
+          "name": "paginable",
+          "description": "Group a request's items in pages and define which page you want to display\n",
+          "values": []
+        },
+        {
+          "name": "sortable",
+          "values": []
+        }
+      ],
+      "x-badges": [],
+      "x-paginable": true,
+      "x-sortable": true,
+      "x-auth-user": true,
+      "queryParameters": [
+        {
+          "description": "*Optional* : Allows loading additional data about a resource, which may include related resources.",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string",
+            "enum": ["fqdn"]
+          },
+          "x-values": ["fqdn"],
+          "name": "with",
+          "in": "query"
+        },
+        {
+          "description": "The account identifier",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "account_id",
+            "type": "integer",
+            "description": "Unique identifier of the `account` that is related to the resource `{name}`"
+          },
+          "name": "account_id",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "customer_name",
+            "type": "string",
+            "description": "Customer name of the resource `{name}`"
+          },
+          "name": "customer_name",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "fqdn",
+            "type": "string"
+          },
+          "name": "fqdn",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "internal_name",
+            "type": "string"
+          },
+          "name": "internal_name",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "product_id",
+            "type": "integer",
+            "description": "Unique identifier of the `product` that is related to the resource `{name}`"
+          },
+          "name": "product_id",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "service_id",
+            "enum": [
+              1, 2, 3, 4, 6, 7, 10, 14, 15, 18, 23, 25, 26, 29, 30, 31, 34, 35, 37, 40, 43, 48, 50,
+              52, 58
+            ],
+            "type": "integer",
+            "description": "Unique identifier of the `service` that is related to the resource `{name}`"
+          },
+          "name": "service_id",
+          "in": "query"
+        },
+        {
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "title": "service_name",
+            "enum": [
+              "ai_tools",
+              "backup",
+              "certificate",
+              "cloud",
+              "cloud_hd",
+              "custom_url",
+              "dedicated_server",
+              "domain",
+              "drive",
+              "e_ticketing",
+              "email_hosting",
+              "hosting",
+              "housing",
+              "invitation",
+              "jelastic",
+              "ksuite",
+              "mailing",
+              "nas",
+              "public_cloud",
+              "radio",
+              "swiss_backup",
+              "video",
+              "vod",
+              "web_hosting",
+              "website_builder"
+            ],
+            "type": "string",
+            "description": "Name of the service"
+          },
+          "name": "service_name",
+          "in": "query"
+        },
+        {
+          "description": "*Optional* :  If you pass this parameter with the value `total`, then the response will be the number of items in the collection, instead of the items themselves.<br />\nPart of the `total` capacity\n",
+          "schema": {
+            "enum": ["total"],
+            "type": "string"
+          },
+          "name": "return",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the number of items to return<br />\nPart of the `offset` capacity\n",
+          "schema": {
+            "type": "integer"
+          },
+          "name": "limit",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the index of the first item to return (0 = first item)<br />\nPart of the `offset` capacity\n",
+          "schema": {
+            "type": "integer"
+          },
+          "name": "skip",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the page number<br />\nPart of the `pagination` capacity\n",
+          "schema": {
+            "description": "*Optional parameter* that define the page number<br />\nPart of the `pagination` capacity\n",
+            "type": "integer",
+            "default": 1
+          },
+          "name": "page",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the number of items per page<br />\nPart of the `pagination` capacity\n",
+          "schema": {
+            "description": "*Optional parameter* that define the number of items per page<br />\nPart of the `pagination` capacity\n",
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": "per_page",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+          "style": "form",
+          "explode": false,
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "name": "order_by",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the default sort order<br />\nPart of the `sort` capacity\n",
+          "schema": {
+            "enum": ["asc", "desc"],
+            "type": "string",
+            "default": "asc"
+          },
+          "name": "order",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+          "style": "deepObject",
+          "explode": true,
+          "schema": {
+            "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+            "type": "object",
+            "enum": ["asc", "desc"]
+          },
+          "name": "order_for",
+          "in": "query"
+        }
+      ],
+      "pathParameters": [],
+      "headerParameters": [],
+      "x-codeSamples": [
+        {
+          "lang": "Curl",
+          "label": "Curl",
+          "source": "curl -G \\\n -H \"Authorization: Bearer YOUR-TOKEN-HERE\" \\\n -H \"Content-Type: application/json\" \\\n'https://api.infomaniak.com/1/products'\n"
+        }
+      ],
+      "x-is-beta": false,
+      "x-is-public-cloud": false
+    }
+  }
+}

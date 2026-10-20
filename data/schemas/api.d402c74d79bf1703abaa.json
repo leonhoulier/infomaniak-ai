@@ -1,0 +1,760 @@
+{
+  "catalogue_id": "api.d402c74d79bf1703abaa",
+  "source": "https://developer.infomaniak.com/docs/api/get/2/zones/{zone}/records/{record}",
+  "operation": {
+    "method": "get",
+    "uri": "get/2/zones/{zone}/records/{record}",
+    "path": "https://api.infomaniak.com/2/zones/{zone}/records/{record}",
+    "meta": {
+      "tags": ["Zone > Dns Record"],
+      "summary": "Show dns record",
+      "description": "Retrieve one dns record for a given zone",
+      "operationId": "Domain/&/ZoneShowDnsRecordV2",
+      "parameters": [
+        {
+          "description": "A domain name or a sub delegated zone",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "zone",
+          "in": "path"
+        },
+        {
+          "description": "Record identifier",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "record",
+          "in": "path"
+        },
+        {
+          "description": "*Optional* : Allows loading additional data about a resource, which may include related resources.",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string",
+            "enum": ["idn", "alias", "records_description", "label"]
+          },
+          "x-values": ["idn", "alias", "records_description", "label"],
+          "name": "with",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "enum": ["success", "error", "asynchronous"],
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "title": "Dns record",
+                        "x-ref": "api_dns_dns_record",
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "title": "id",
+                            "type": "integer",
+                            "description": "The identifier of the dns record",
+                            "required": true
+                          },
+                          "source": {
+                            "title": "source",
+                            "type": "string",
+                            "description": "The source of the dns record",
+                            "required": true
+                          },
+                          "source_idn": {
+                            "title": "source_idn",
+                            "type": "string",
+                            "description": "The full idn of the dns record",
+                            "x-conditional": true,
+                            "x-with": ["idn"]
+                          },
+                          "type": {
+                            "title": "type",
+                            "enum": [
+                              "A",
+                              "AAAA",
+                              "CAA",
+                              "CNAME",
+                              "DNAME",
+                              "DNSKEY",
+                              "DS",
+                              "MX",
+                              "NS",
+                              "PTR",
+                              "SMIMEA",
+                              "SOA",
+                              "SRV",
+                              "SSHFP",
+                              "TLSA",
+                              "TXT"
+                            ],
+                            "type": "string",
+                            "description": "The type of the dns record",
+                            "required": true
+                          },
+                          "ttl": {
+                            "title": "ttl",
+                            "type": "integer",
+                            "description": "The TTL of the dns record",
+                            "required": true
+                          },
+                          "target": {
+                            "title": "target",
+                            "type": "string",
+                            "description": "The dns record target",
+                            "required": true
+                          },
+                          "updated_at": {
+                            "title": "updated_at",
+                            "type": "integer",
+                            "description": "The last updated time of the dns record",
+                            "format": "timestamp",
+                            "required": true
+                          },
+                          "dyndns_id": {
+                            "title": "dyndns_id",
+                            "type": "integer",
+                            "description": "If any, the dyndns user identifier related to the dns record",
+                            "x-optional": true
+                          },
+                          "delegated_zone": {
+                            "title": "Api Resource",
+                            "x-ref": "api_dns_api_resource",
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "title": "id",
+                                "type": "object",
+                                "oneOf": [
+                                  {
+                                    "title": "integer",
+                                    "type": "integer"
+                                  },
+                                  {
+                                    "title": "string",
+                                    "type": "string"
+                                  }
+                                ],
+                                "description": "Unique identifier",
+                                "required": true
+                              },
+                              "uri": {
+                                "title": "uri",
+                                "type": "string",
+                                "description": "API endpoint of this resource",
+                                "required": true
+                              }
+                            }
+                          },
+                          "description": {
+                            "title": "Dns record description",
+                            "x-ref": "api_dns_dns_record_description",
+                            "type": "object",
+                            "properties": {
+                              "priority": {
+                                "title": "priority",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true,
+                                    "x-with": ["label"]
+                                  }
+                                },
+                                "description": "Only available with MX and SRV dns record, the priority attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "port": {
+                                "title": "port",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SRV dns record, the port attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "weight": {
+                                "title": "weight",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SRV dns record, the weight attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "protocol": {
+                                "title": "protocol",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "string",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SRV and DNSKEY dns record, the protocol attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "flags": {
+                                "title": "flags",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with CAA and DNSKEY dns record, the flags attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "tag": {
+                                "title": "tag",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "string",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with CAA dns record, the tag attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "usage": {
+                                "title": "usage",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with TLSA or SMIMEA dns record, the usage attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "selector": {
+                                "title": "selector",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with TLSA or SMIMEA dns record, the selector attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "matching_type": {
+                                "title": "matching_type",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with TLSA, SSHFP or SMIMEA dns record, the matching type attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "algorithm": {
+                                "title": "algorithm",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SSHFP, DS and DNSKEY dns record, the algorithm attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "key_tag": {
+                                "title": "key_tag",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with DS dns record, the key tag attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "digest_type": {
+                                "title": "digest_type",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with DS dns record, the digest type attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "digest": {
+                                "title": "digest",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "string",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with DS dns record, the digest type attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "mname": {
+                                "title": "mname",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "string",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SOA dns record, the mname attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "rname": {
+                                "title": "rname",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "string",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SOA dns record, the rname attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "serial": {
+                                "title": "serial",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SOA dns record, the serial attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "refresh": {
+                                "title": "refresh",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SOA dns record, the refresh attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "retry": {
+                                "title": "retry",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SOA dns record, the retry attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "expire": {
+                                "title": "expire",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SOA dns record, the expire attribute of the dns record",
+                                "x-optional": true
+                              },
+                              "minimum_ttl": {
+                                "title": "minimum_ttl",
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "title": "value",
+                                    "type": "integer",
+                                    "description": "The value of the attribute",
+                                    "x-optional": true
+                                  },
+                                  "label": {
+                                    "title": "label",
+                                    "type": "string",
+                                    "description": "The human readable value of the attribute",
+                                    "x-optional": true,
+                                    "x-conditional": true
+                                  }
+                                },
+                                "description": "Only available with SOA dns record, the minimum ttl attribute of the dns record",
+                                "x-optional": true
+                              }
+                            },
+                            "description": "The description of the dns record",
+                            "x-conditional": true,
+                            "x-with": ["records_description"]
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 401",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["not_authorized"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>not_authorized</strong>: Triggered when the user is not authorized to access this resource.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 404",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["object_not_found"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>object_not_found</strong>: Triggered when the asked entity is not accessible.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "x-version": 2,
+      "x-category": "Domain & Zone",
+      "x-subCategory": "Zone > Dns Record",
+      "x-visible": true,
+      "x-scopes": ["dns:read"],
+      "x-badges": [],
+      "x-auth-user": true,
+      "queryParameters": [
+        {
+          "description": "*Optional* : Allows loading additional data about a resource, which may include related resources.",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string",
+            "enum": ["idn", "alias", "records_description", "label"]
+          },
+          "x-values": ["idn", "alias", "records_description", "label"],
+          "name": "with",
+          "in": "query"
+        }
+      ],
+      "pathParameters": [
+        {
+          "description": "A domain name or a sub delegated zone",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "zone",
+          "in": "path"
+        },
+        {
+          "description": "Record identifier",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "record",
+          "in": "path"
+        }
+      ],
+      "headerParameters": [],
+      "x-codeSamples": [
+        {
+          "lang": "Curl",
+          "label": "Curl",
+          "source": "curl -G \\\n -H \"Authorization: Bearer YOUR-TOKEN-HERE\" \\\n -H \"Content-Type: application/json\" \\\n'https://api.infomaniak.com/2/zones/{zone}/records/{record}'\n"
+        }
+      ],
+      "x-is-beta": false,
+      "x-is-public-cloud": false
+    }
+  }
+}

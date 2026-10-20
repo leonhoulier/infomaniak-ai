@@ -1,0 +1,753 @@
+{
+  "catalogue_id": "api.30334c38f565fbed58c6",
+  "source": "https://developer.infomaniak.com/docs/api/get/1/accounts",
+  "operation": {
+    "method": "get",
+    "uri": "get/1/accounts",
+    "path": "https://api.infomaniak.com/1/accounts",
+    "meta": {
+      "tags": ["User Management > Accounts"],
+      "summary": "List accounts",
+      "description": "This endpoint allows you to retrieve all the accounts of a user.",
+      "operationId": "Core/ResourcesListAccounts",
+      "parameters": [
+        {
+          "description": "*Optional* : Allows loading additional data about a resource, which may include related resources.",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "language",
+              "addresses",
+              "timezone",
+              "logo",
+              "order",
+              "demo",
+              "partnerships",
+              "invoicing_config",
+              "user_removal_info",
+              "student",
+              "ksuite_ids",
+              "my_ksuite",
+              "restricted_owner",
+              "videos"
+            ]
+          },
+          "x-values": [
+            "language",
+            "addresses",
+            "timezone",
+            "logo",
+            "order",
+            "demo",
+            "partnerships",
+            "invoicing_config",
+            "user_removal_info",
+            "student",
+            "ksuite_ids",
+            "my_ksuite",
+            "restricted_owner",
+            "videos"
+          ],
+          "name": "with",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+          "style": "form",
+          "explode": false,
+          "schema": {
+            "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "enum": ["name"]
+          },
+          "name": "order_by",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the default sort order<br />\nPart of the `sort` capacity\n",
+          "schema": {
+            "enum": ["asc", "desc"],
+            "type": "string",
+            "default": "asc"
+          },
+          "name": "order",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+          "style": "deepObject",
+          "explode": true,
+          "schema": {
+            "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+            "type": "object",
+            "enum": ["asc", "desc"]
+          },
+          "name": "order_for",
+          "in": "query"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "enum": ["success", "error", "asynchronous"],
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "title": "Account",
+                          "x-ref": "Account",
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "title": "Unique identifier",
+                              "type": "integer",
+                              "description": "Unique identifier of the resource `Account`",
+                              "required": true
+                            },
+                            "name": {
+                              "title": "name",
+                              "type": "string",
+                              "description": "Name of the resource `Account`",
+                              "required": true
+                            },
+                            "legal_entity_type": {
+                              "title": "legal_entity_type",
+                              "enum": ["company", "individual", "public_body", "restrict"],
+                              "type": "string",
+                              "required": true
+                            },
+                            "created_at": {
+                              "title": "created_at",
+                              "type": "integer",
+                              "description": "Timestamp `Account` has been created",
+                              "format": "timestamp",
+                              "required": true
+                            },
+                            "addresses": {
+                              "title": "addresses",
+                              "type": "array",
+                              "items": {
+                                "title": "Account address",
+                                "x-ref": "Accountaddress",
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "title": "Unique identifier",
+                                    "type": "integer",
+                                    "description": "Unique identifier of the resource `Account address`",
+                                    "required": true
+                                  },
+                                  "street": {
+                                    "title": "street",
+                                    "type": "string",
+                                    "required": true
+                                  },
+                                  "street2": {
+                                    "title": "street2",
+                                    "type": "string",
+                                    "required": true
+                                  },
+                                  "zip": {
+                                    "title": "zip",
+                                    "type": "string",
+                                    "required": true
+                                  },
+                                  "city": {
+                                    "title": "city",
+                                    "type": "string",
+                                    "required": true
+                                  },
+                                  "type": {
+                                    "title": "type",
+                                    "type": "string",
+                                    "required": true
+                                  },
+                                  "created_at": {
+                                    "title": "created_at",
+                                    "type": "integer",
+                                    "description": "Timestamp `Account address` has been created",
+                                    "format": "timestamp",
+                                    "required": true
+                                  },
+                                  "country": {
+                                    "title": "Country",
+                                    "x-ref": "Country",
+                                    "required": true,
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "title": "Unique identifier",
+                                        "type": "integer",
+                                        "description": "Unique identifier of the resource `Country`",
+                                        "format": "int32"
+                                      },
+                                      "name": {
+                                        "title": "name",
+                                        "type": "string",
+                                        "description": "Name of the resource `Country`"
+                                      },
+                                      "short_name": {
+                                        "title": "short_name",
+                                        "type": "string",
+                                        "description": "Short name of the resource `Country`"
+                                      },
+                                      "is_enabled": {
+                                        "title": "is_enabled",
+                                        "type": "boolean",
+                                        "description": "Is the resource `Country` enabled?"
+                                      }
+                                    }
+                                  },
+                                  "for_invoice": {
+                                    "title": "for_invoice",
+                                    "type": "boolean",
+                                    "required": true
+                                  }
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["addresses"]
+                            },
+                            "timezone": {
+                              "title": "timezone",
+                              "type": "string",
+                              "x-conditional": true,
+                              "x-with": ["timezone"]
+                            },
+                            "website": {
+                              "title": "website",
+                              "type": "string",
+                              "x-optional": true
+                            },
+                            "phone": {
+                              "title": "phone",
+                              "type": "string",
+                              "x-optional": true
+                            },
+                            "fax": {
+                              "title": "fax",
+                              "type": "string",
+                              "x-optional": true
+                            },
+                            "language": {
+                              "title": "language",
+                              "type": "string",
+                              "x-conditional": true,
+                              "x-with": ["language"]
+                            },
+                            "locale": {
+                              "title": "locale",
+                              "type": "string",
+                              "description": "Represents a language identifier and a region identifier",
+                              "required": true
+                            },
+                            "language_id": {
+                              "title": "language_id",
+                              "type": "integer",
+                              "description": "Unique identifier of the `language` that is related to the resource `Account`",
+                              "required": true
+                            },
+                            "logo": {
+                              "title": "logo",
+                              "type": "string",
+                              "x-conditional": true,
+                              "x-with": ["logo"]
+                            },
+                            "logo_square": {
+                              "title": "logo_square",
+                              "type": "string",
+                              "x-conditional": true,
+                              "x-with": ["logo"]
+                            },
+                            "order": {
+                              "title": "order",
+                              "type": "object",
+                              "properties": {
+                                "waiting_payment": {
+                                  "title": "waiting_payment",
+                                  "type": "integer",
+                                  "required": true
+                                },
+                                "in_process": {
+                                  "title": "in_process",
+                                  "type": "integer",
+                                  "required": true
+                                },
+                                "blocked_order_id": {
+                                  "title": "blocked_order_id",
+                                  "type": "array",
+                                  "required": true
+                                }
+                              },
+                              "x-conditional": true,
+                              "x-with": ["order"]
+                            },
+                            "beta": {
+                              "title": "beta",
+                              "type": "boolean",
+                              "required": true
+                            },
+                            "support_level": {
+                              "title": "support_level",
+                              "type": "integer",
+                              "required": true
+                            },
+                            "has_2fa_required": {
+                              "title": "has_2fa_required",
+                              "type": "boolean",
+                              "required": true
+                            },
+                            "type": {
+                              "title": "type",
+                              "type": "string",
+                              "x-conditional": true
+                            },
+                            "billing": {
+                              "title": "billing",
+                              "type": "boolean",
+                              "x-conditional": true
+                            },
+                            "mailing": {
+                              "title": "mailing",
+                              "type": "boolean",
+                              "x-conditional": true
+                            },
+                            "billing_mailing": {
+                              "title": "billing_mailing",
+                              "type": "boolean",
+                              "x-conditional": true
+                            },
+                            "workspace_only": {
+                              "title": "workspace_only",
+                              "type": "boolean",
+                              "x-conditional": true
+                            },
+                            "no_access": {
+                              "title": "no_access",
+                              "type": "boolean",
+                              "x-conditional": true
+                            },
+                            "is_blocked": {
+                              "title": "is_blocked",
+                              "type": "boolean",
+                              "x-conditional": true
+                            },
+                            "blocked_at": {
+                              "title": "blocked_at",
+                              "type": "integer",
+                              "format": "timestamp",
+                              "x-optional": true,
+                              "x-conditional": true
+                            },
+                            "vat_number": {
+                              "title": "vat_number",
+                              "type": "string",
+                              "x-optional": true,
+                              "x-conditional": true
+                            },
+                            "field1": {
+                              "title": "field1",
+                              "type": "string",
+                              "x-optional": true,
+                              "x-conditional": true
+                            },
+                            "field2": {
+                              "title": "field2",
+                              "type": "string",
+                              "x-optional": true,
+                              "x-conditional": true
+                            },
+                            "tags": {
+                              "title": "tags",
+                              "type": "array",
+                              "items": {
+                                "title": "Tag",
+                                "x-ref": "Tag",
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "title": "Unique identifier",
+                                    "type": "integer",
+                                    "description": "Unique identifier of the resource `Tag`",
+                                    "required": true
+                                  },
+                                  "name": {
+                                    "title": "name",
+                                    "type": "string",
+                                    "description": "Name of the resource `Tag`",
+                                    "required": true
+                                  },
+                                  "color": {
+                                    "title": "color",
+                                    "type": "integer",
+                                    "required": true
+                                  },
+                                  "product_count": {
+                                    "title": "product_count",
+                                    "type": "integer",
+                                    "description": "Product count related to the resource `Tag`",
+                                    "x-conditional": true,
+                                    "x-with": ["#products"]
+                                  }
+                                }
+                              },
+                              "x-optional": true,
+                              "x-conditional": true
+                            },
+                            "services_already_demo": {
+                              "title": "services_already_demo",
+                              "type": "array",
+                              "x-conditional": true,
+                              "x-with": ["demo"]
+                            },
+                            "customization_url": {
+                              "title": "customization_url",
+                              "type": "object",
+                              "x-conditional": true,
+                              "x-with": ["customization_url"]
+                            },
+                            "nb_invitations": {
+                              "title": "nb_invitations",
+                              "type": "integer",
+                              "x-conditional": true,
+                              "x-with": ["#invitations"]
+                            },
+                            "nb_users": {
+                              "title": "nb_users",
+                              "type": "integer",
+                              "x-optional": true,
+                              "x-conditional": true
+                            },
+                            "count_owners": {
+                              "title": "count_owners",
+                              "type": "integer",
+                              "x-conditional": true
+                            },
+                            "is_customer": {
+                              "title": "is_customer",
+                              "type": "boolean",
+                              "required": true
+                            },
+                            "is_sso": {
+                              "title": "is_sso",
+                              "type": "boolean",
+                              "required": true
+                            },
+                            "has_full_access": {
+                              "title": "has_full_access",
+                              "type": "boolean",
+                              "x-conditional": true
+                            },
+                            "has_customer_paiement_method": {
+                              "title": "has_customer_paiement_method",
+                              "type": "boolean",
+                              "x-conditional": true
+                            },
+                            "partner_id": {
+                              "title": "partner_id",
+                              "type": "integer",
+                              "x-conditional": true
+                            },
+                            "in_partnership_full_access": {
+                              "title": "in_partnership_full_access",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["partnerships"]
+                            },
+                            "in_partnership_limited": {
+                              "title": "in_partnership_limited",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["partnerships"]
+                            },
+                            "support_premium": {
+                              "title": "support_premium",
+                              "type": "object",
+                              "x-optional": true,
+                              "x-conditional": true,
+                              "x-with": ["support_premium"]
+                            },
+                            "is_user_has_ksuite_access": {
+                              "title": "is_user_has_ksuite_access",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["user_removal_info"]
+                            },
+                            "is_user_email_account_mailbox_exist": {
+                              "title": "is_user_email_account_mailbox_exist",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["user_removal_info"]
+                            },
+                            "ksuite_id": {
+                              "title": "ksuite_id",
+                              "type": "integer",
+                              "description": "Unique identifier of the `ksuite` that is related to the resource `Account`",
+                              "nullable": true,
+                              "x-conditional": true,
+                              "x-with": ["ksuite_ids"]
+                            },
+                            "my_ksuite": {
+                              "title": "my_ksuite",
+                              "type": "object",
+                              "nullable": true,
+                              "x-conditional": true,
+                              "x-with": ["my_ksuite"]
+                            },
+                            "has_onboarding_branding": {
+                              "title": "has_onboarding_branding",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["has_onboarding_branding"]
+                            },
+                            "has_streaming_video": {
+                              "title": "has_streaming_video",
+                              "type": "boolean",
+                              "x-conditional": true,
+                              "x-with": ["videos"]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 401",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["not_authorized"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>not_authorized</strong>: Triggered when the user is not authorized to access this resource.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 404",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["object_not_found"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>object_not_found</strong>: Triggered when the asked entity is not accessible.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "x-version": 1,
+      "x-category": "Core Resources",
+      "x-subCategory": "User Management > Accounts",
+      "x-visible": true,
+      "x-capabilities": [
+        {
+          "name": "sortable",
+          "values": []
+        }
+      ],
+      "x-scopes": ["accounts"],
+      "x-badges": [],
+      "x-sortable": true,
+      "x-auth-user": true,
+      "queryParameters": [
+        {
+          "description": "*Optional* : Allows loading additional data about a resource, which may include related resources.",
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "language",
+              "addresses",
+              "timezone",
+              "logo",
+              "order",
+              "demo",
+              "partnerships",
+              "invoicing_config",
+              "user_removal_info",
+              "student",
+              "ksuite_ids",
+              "my_ksuite",
+              "restricted_owner",
+              "videos"
+            ]
+          },
+          "x-values": [
+            "language",
+            "addresses",
+            "timezone",
+            "logo",
+            "order",
+            "demo",
+            "partnerships",
+            "invoicing_config",
+            "user_removal_info",
+            "student",
+            "ksuite_ids",
+            "my_ksuite",
+            "restricted_owner",
+            "videos"
+          ],
+          "name": "with",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+          "style": "form",
+          "explode": false,
+          "schema": {
+            "description": "*Optional parameter* that define the field used for sorting<br />\nPart of the `sort` capacity\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "enum": ["name"]
+          },
+          "name": "order_by",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the default sort order<br />\nPart of the `sort` capacity\n",
+          "schema": {
+            "enum": ["asc", "desc"],
+            "type": "string",
+            "default": "asc"
+          },
+          "name": "order",
+          "in": "query"
+        },
+        {
+          "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+          "style": "deepObject",
+          "explode": true,
+          "schema": {
+            "description": "*Optional parameter* that define the sorting order for a field<br />\nBy default **order** is used<br />\nPart of the `sort` capacity\n",
+            "type": "object",
+            "enum": ["asc", "desc"]
+          },
+          "name": "order_for",
+          "in": "query"
+        }
+      ],
+      "pathParameters": [],
+      "headerParameters": [],
+      "x-codeSamples": [
+        {
+          "lang": "Curl",
+          "label": "Curl",
+          "source": "curl -G \\\n -H \"Authorization: Bearer YOUR-TOKEN-HERE\" \\\n -H \"Content-Type: application/json\" \\\n'https://api.infomaniak.com/1/accounts'\n"
+        }
+      ],
+      "x-is-beta": false,
+      "x-is-public-cloud": false
+    }
+  }
+}

@@ -1,0 +1,245 @@
+{
+  "catalogue_id": "api.8fb0482f001119f3a39c",
+  "source": "https://developer.infomaniak.com/docs/api/delete/2/zones/{zone}/records/{record}",
+  "operation": {
+    "method": "delete",
+    "uri": "delete/2/zones/{zone}/records/{record}",
+    "path": "https://api.infomaniak.com/2/zones/{zone}/records/{record}",
+    "meta": {
+      "tags": ["Zone > Dns Record"],
+      "summary": "Delete dns record",
+      "description": "Delete a dns record",
+      "operationId": "Domain/&/ZoneDeleteDnsRecordV2",
+      "parameters": [
+        {
+          "description": "A domain name or a sub delegated zone",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "zone",
+          "in": "path"
+        },
+        {
+          "description": "Record identifier",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "record",
+          "in": "path"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "enum": ["success", "error", "asynchronous"],
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 401",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["not_authorized"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>not_authorized</strong>: Triggered when the user is not authorized to access this resource.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 404",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["object_not_found", "zone_does_not_exists"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>zone_does_not_exists</strong>: Triggered when the server try to retrieve a zone that does not exist.</note><note><strong>object_not_found</strong>: Triggered when the asked entity is not accessible.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "title": "Generic error response schema to be reused",
+                    "type": "object",
+                    "properties": {
+                      "result": {
+                        "type": "string",
+                        "description": "Result of the HTTP request",
+                        "required": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "title": "The error returned when the http code is 500",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "enum": ["cannot_delete_object"],
+                            "type": "string",
+                            "description": "The error code returned, the <strong>description</strong> add details relative to this code.<note><strong>cannot_delete_object</strong>: Triggered when the entity cannot be deleted.</note>"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "More details about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "x-version": 2,
+      "x-category": "Domain & Zone",
+      "x-subCategory": "Zone > Dns Record",
+      "x-visible": true,
+      "x-scopes": ["dns:write"],
+      "x-badges": [],
+      "x-auth-user": true,
+      "queryParameters": [],
+      "pathParameters": [
+        {
+          "description": "A domain name or a sub delegated zone",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "string"
+          },
+          "name": "zone",
+          "in": "path"
+        },
+        {
+          "description": "Record identifier",
+          "required": true,
+          "style": "simple",
+          "explode": true,
+          "schema": {
+            "type": "integer"
+          },
+          "name": "record",
+          "in": "path"
+        }
+      ],
+      "headerParameters": [],
+      "x-codeSamples": [
+        {
+          "lang": "Curl",
+          "label": "Curl",
+          "source": " curl -X DELETE \\\n -H \"Authorization: Bearer YOUR-TOKEN-HERE\" \\\n -H \"Content-Type: application/json\" \\\n'https://api.infomaniak.com/2/zones/{zone}/records/{record}'\n"
+        }
+      ],
+      "x-is-beta": false,
+      "x-is-public-cloud": false
+    }
+  }
+}
