@@ -1,3 +1,4 @@
+import { Resolver } from "node:dns/promises";
 import { isIP } from "node:net";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
@@ -614,6 +615,231 @@ for (const [name, backendName, fields, scope] of [
       },
     }),
   );
+// ---------------------------------------------------------------------------
+// Read-only diagnostics. They combine reads; none of them can write.
+// ---------------------------------------------------------------------------
+
+const DAY = 86_400_000;
+const apexName = (zone: string, source: string): string =>
+  source === "." || source === "@" ? zone : source + "." + zone;
+const host = (v: string): string => v.trim().toLowerCase().replace(/\.$/, "");
+const unquote = (v: string): string =>
+  v
+    .trim()
+    .replace(/"\s+"/g, "")
+    .replace(/^"(.*)"$/s, "$1");
+interface Finding {
+  code: string;
+  severity: "error" | "warning" | "info";
+  message: string;
+}
+/** Mail-authentication and record hygiene checks on one zone's stored records. */
+export function auditRecords(records: Array<Record<string, unknown>>): Finding[] {
+  const at = (type: string, source: string) =>
+    records.filter((r) => r.type === type && (r.source || ".") === source);
+  const findings: Finding[] = [];
+  const add = (code: string, severity: Finding["severity"], message: string) =>
+    findings.push({ code, severity, message });
+  const spf = at("TXT", ".").filter((r) => unquote(String(r.target)).startsWith("v=spf1"));
+  const mx = at("MX", ".").map((r) => host(String(r.target).replace(/^\d+\s+/, "")));
+  if (spf.length === 0)
+    add("spf_missing", "warning", "No SPF record at the apex; anyone can send as this domain.");
+  if (spf.length > 1)
+    add(
+      "spf_multiple",
+      "error",
+      "More than one SPF record at the apex; receivers treat SPF as broken.",
+    );
+  for (const r of spf) {
+    const value = unquote(String(r.target));
+    if (/\s\+all\b/.test(value))
+      add("spf_allows_all", "error", "SPF ends in +all, which authorizes every sender.");
+    if (mx.includes("mta-gw.infomaniak.ch") && !value.includes("include:spf.infomaniak.ch"))
+      add(
+        "spf_missing_infomaniak",
+        "warning",
+        "MX is Infomaniak but SPF lacks include:spf.infomaniak.ch; Infomaniak-sent mail may fail SPF.",
+      );
+  }
+  const dmarc = at("TXT", "_dmarc").filter((r) => unquote(String(r.target)).startsWith("v=DMARC1"));
+  if (dmarc.length === 0) add("dmarc_missing", "warning", "No DMARC record at _dmarc.");
+  else if (dmarc.some((r) => /;\s*p=none\b/i.test(unquote(String(r.target)))))
+    add("dmarc_monitor_only", "info", "DMARC policy is p=none: reports only, nothing is rejected.");
+  const dkim = records.filter((r) => String(r.source ?? "").endsWith("_domainkey"));
+  if (dkim.some((r) => r.type === "NS"))
+    add(
+      "dkim_delegated",
+      "info",
+      "_domainkey is delegated by NS; DKIM keys are served by those name servers, not this zone.",
+    );
+  else if (dkim.length === 0 && mx.length > 0)
+    add(
+      "dkim_not_found",
+      "info",
+      "No DKIM record under _domainkey. Inconclusive: selectors are not discoverable from the zone alone.",
+    );
+  if (mx.length === 0)
+    add("mx_missing", "info", "No MX at the apex; mail to this domain is not delivered.");
+  if (at("CNAME", ".").length > 0)
+    add(
+      "apex_cname",
+      "error",
+      "CNAME at the apex conflicts with the zone's NS/SOA and MX records.",
+    );
+  const low = records.filter((r) => Number(r.ttl) < 300 && r.type !== "NS");
+  if (low.length > 0) add("low_ttl", "info", low.length + " record(s) have a TTL under 300 s.");
+  return findings;
+}
+const RESOLVERS = { google: "8.8.8.8", cloudflare: "1.1.1.1", quad9: "9.9.9.9" } as const;
+/** Swappable for tests; real lookups go to the three public resolvers directly. */
+export const lookup = {
+  query: async (server: string, name: string, type: string): Promise<unknown[]> => {
+    // Two tries: with one, about a fifth of healthy lookups time out.
+    const resolver = new Resolver({ timeout: 3000, tries: 2 });
+    resolver.setServers([server]);
+    return (await resolver.resolve(name, type)) as unknown[];
+  },
+};
+function answer(type: string, v: unknown): string {
+  if (type === "MX" && v && typeof v === "object") {
+    const r = v as { priority?: unknown; exchange?: unknown };
+    return r.priority + " " + host(String(r.exchange));
+  }
+  if (type === "TXT" && Array.isArray(v)) return v.join("");
+  if (type === "CAA" && v && typeof v === "object") return canonical(v);
+  return ["CNAME", "NS"].includes(type) ? host(String(v)) : String(v);
+}
+function zoneValue(type: string, target: string): string {
+  if (type === "MX") {
+    const [priority, exchange] = target.trim().split(/\s+/, 2);
+    return priority + " " + host(String(exchange));
+  }
+  if (type === "TXT") return unquote(target);
+  return ["CNAME", "NS"].includes(type) ? host(target) : target.trim();
+}
+operations.push(
+  reading({
+    id: "domains.expiry",
+    product: "Domain & Zone",
+    summary: "List domain registrations with UTC expiry dates and days left.",
+    method: "GET",
+    path: "/1/products?service_name=domain",
+    notes: [
+      "Dates are UTC; the Manager shows local time.",
+      "Expiry is registration expiry, not DNS or certificate expiry.",
+    ],
+    input: z.object({ ...base, warn_days: z.number().int().min(1).max(365).default(30) }).strict(),
+    read: async (api, a) => {
+      const now = Date.now();
+      return sorted(
+        list(
+          await api.request(
+            "GET",
+            "/1/products?account_id=" + a.account_id + "&service_name=domain&per_page=1000",
+          ),
+        ).map((v) => {
+          const r = object(v),
+            at = Number(r.expired_at);
+          const known = Number.isFinite(at) && at > 0;
+          // Status from the timestamp itself: 12 hours past expiry is expired, not "0 days left".
+          const days = known ? Math.trunc((at * 1000 - now) / DAY) || 0 : null;
+          return {
+            domain: r.customer_name,
+            product_id: r.id,
+            expires_at_utc: days === null ? null : new Date(at * 1000).toISOString(),
+            days_left: days,
+            status:
+              days === null
+                ? "unknown"
+                : at * 1000 <= now
+                  ? "expired"
+                  : days <= Number(a.warn_days)
+                    ? "expiring"
+                    : "ok",
+          };
+        }),
+      ).sort((x, y) => (x.days_left ?? Infinity) - (y.days_left ?? Infinity));
+    },
+  }),
+  reading({
+    id: "dns.audit",
+    product: "Domain & Zone",
+    summary: "Check one zone's SPF, DMARC, DKIM, MX, apex CNAME and TTLs from its stored records.",
+    method: "GET",
+    path: "/2/zones/{zone}/records?view=audit",
+    resource: scopeDns,
+    notes: [
+      "Findings describe the stored zone, not delivery or signing tests.",
+      "_domainkey delegated by NS (common on Infomaniak mail) means DKIM lives on those servers.",
+    ],
+    input: z.object(dns).strict(),
+    read: async (api, a) => {
+      const records = list(await dnsState(api, a)).map(object);
+      return { zone: a.zone, records: records.length, findings: auditRecords(records) };
+    },
+  }),
+  reading({
+    id: "dns.propagation",
+    product: "Domain & Zone",
+    summary:
+      "Ask Google, Cloudflare and Quad9 for one name in a granted zone and compare with the zone.",
+    method: "GET",
+    path: "/2/zones/{zone}/records?view=propagation",
+    resource: scopeDns,
+    notes: [
+      "A failed or empty lookup counts as disagreement.",
+      "Agreement among three resolvers is not proof of global propagation; caches hold old values until TTL expiry.",
+    ],
+    input: z
+      .object({
+        ...dns,
+        source: dnsFields.source.default("."),
+        type: z.enum(["A", "AAAA", "CNAME", "MX", "TXT", "NS", "CAA"]).default("A"),
+      })
+      .strict(),
+    read: async (api, a) => {
+      const type = String(a.type),
+        source = String(a.source);
+      const expected = [
+        ...new Set(
+          list(await dnsState(api, a))
+            .map(object)
+            .filter((r) => r.source === source && r.type === type)
+            .map((r) => zoneValue(type, String(r.target))),
+        ),
+      ].sort(compare);
+      const name = apexName(String(a.zone), source);
+      const results = await Promise.all(
+        Object.entries(RESOLVERS).map(async ([resolver, ip]) => {
+          try {
+            const answers = [
+              ...new Set((await lookup.query(ip, name, type)).map((v) => answer(type, v))),
+            ].sort(compare);
+            return { resolver, ip, answers, error: answers.length ? null : "no answer" };
+          } catch (e) {
+            const code = (e as { code?: unknown }).code;
+            return {
+              resolver,
+              ip,
+              answers: [] as string[],
+              error: typeof code === "string" ? code : "lookup failed",
+            };
+          }
+        }),
+      );
+      const first = canonical(results[0]!.answers);
+      const agree = results.every((r) => r.error === null && canonical(r.answers) === first);
+      return {
+        name,
+        type,
+        zone_values: expected,
+        resolvers: results,
+        resolvers_agree: agree,
+        matches_zone: agree && expected.length > 0 ? first === canonical(expected) : null,
+      };
+    },
+  }),
+);
 export const OPERATIONS = new Map(operations.map((o) => [o.id, o]));
 export function inputSchema(operation: Operation): Record<string, unknown> {
   return zodToJsonSchema(operation.input, {

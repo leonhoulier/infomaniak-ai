@@ -19,6 +19,7 @@ export class FixtureApi {
     has_forward_spam: false,
     redirect_adresses: [{ email: "old@example.net" }],
   };
+  domains = [];
   calls = [];
   failure = undefined;
   readFailure = false;
@@ -32,6 +33,8 @@ export class FixtureApi {
           { id: 10, name: "Owner" },
           { id: 20, name: "Other" },
         ];
+      if (path.startsWith("/1/products") && path.includes("service_name=domain"))
+        return clone(this.domains);
       if (path.startsWith("/1/products"))
         return [
           {
