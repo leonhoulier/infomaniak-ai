@@ -25,6 +25,11 @@ explained by the assistant.
 
 ## Hosting choices
 
+Version 0.2 implements local stdio and authenticated self-hosted HTTP. Its human
+approval interface, private SQLite journal and manually provisioned principals
+are tested with fixtures. A public managed service and OAuth onboarding are not
+implemented; see [hosting.md](hosting.md) for the exact deployment boundary.
+
 The local plugin needs no hosted service. Each user's MCP client launches it on
 their computer and supplies that user's credentials. This remains a supported
 installation mode as the product grows.
@@ -104,7 +109,13 @@ Targets below are acceptance criteria, not measured results:
 
 This is a read-only foundation, not the completed broad-coverage product.
 
-## P1: catalogue and controlled execution
+## P1: catalogue and controlled execution — implemented, live writes unqualified
+
+The full catalogue importer, progressive search, reviewed operation registry,
+policy checks, exact plans, independent human approval, durable execution states,
+resource locks, cancellation and readback are implemented. New catalogue entries
+remain disabled. Fixture tests exercise failure paths and standard MCP clients.
+The original three-tool edition remains available without a policy file.
 
 Build the [API coverage registry and write policy](api-coverage.md) first. Import
 public operation metadata and available schemas with versioned provenance;
@@ -112,8 +123,8 @@ track reviewed additions and removals. Discoverability does not grant execution.
 Keep separately documented service APIs, undocumented routes and Manager-only
 behavior visible as separate categories.
 
-Keep a small MCP interface as the catalogue grows. Future planning, execution
-and operation-status tools can join the existing three tools; do not expose
+Keep a small MCP interface as the catalogue grows. Planning, execution
+and operation-status tools now join the original three tools; do not expose
 thousands of eagerly loaded tool definitions or arbitrary HTTP/JavaScript.
 
 Implement one shared write lifecycle: plan, independent approval, execution,
@@ -126,7 +137,16 @@ cross-account access, stale plans, replayed approvals and duplicate uncertain
 writes fail. A supported write completes against a disposable live target,
 including readback and tested failure handling, before that operation is enabled.
 
-## P2: expand reads and writes by product
+## P2: expand reads and writes by product — first 17 reviewed handlers
+
+Nine reads and eight writes cover scoped inventory, DNS records, mailbox aliases
+and forwarding; two VPS reads reuse the separately reviewed MCP. Other catalogue
+entries remain discoverable gaps. Default configuration disables all writes;
+selected disposable resources are required to qualify actual provider mutations.
+
+Named DNS grants constrain writes to one source label; mailbox grants constrain
+them to one hosting/name pair. Resources also require an explicit writable flag.
+Whole-zone inventory access does not grant whole-zone write access.
 
 Prioritize domains/DNS, mail and the user's VPS products, then expand through the
 entire catalogue. Each product adds useful read and write operations together
@@ -151,7 +171,14 @@ a typed adapter for an established release engine. Coolify and Dokploy are
 candidates, not dependencies of broad API coverage or verified integrations.
 Do not install a release engine on an existing server as part of API discovery.
 
-## P3: remote access and distribution
+## P3: remote access and distribution — self-hosting implemented
+
+The self-hosted edition supports application-specific Bearer credentials, separate
+human approval keys, per-principal policy/state and distinct provider tokens. The
+pinned Docker/Caddy package is prepared; an isolated container test validates
+non-root/read-only operation, disabled networking and crash restart. Production
+TLS, real VPS deployment, native client onboarding and operational restore proof
+still require live evidence. These are not implied by fixture success.
 
 - Infomaniak-hosted remote MCP, starting with single-owner deployment.
 - Separate MCP authentication from downstream Infomaniak credentials; verify the
@@ -165,10 +192,11 @@ Do not install a release engine on an existing server as part of API discovery.
 
 ## Current limits and unresolved evidence
 
-The current runtime has no writes, remote HTTP endpoint, deployment, promotion,
-rollback, SSH execution or billing actions. It does not expose credential-returning
-routes. Existing test results remain scoped to the foundation in
-[validation.md](validation.md); the controls described for P1–P3 are planned.
+The runtime implements controlled writes and authenticated HTTP, with writes
+disabled by default. It has no application deployment, promotion, rollback,
+arbitrary SSH, billing actions or credential-returning routes. Tests and exact
+proof boundaries are recorded in [validation.md](validation.md). Most API
+families, OAuth onboarding and automated multi-user provisioning remain work.
 
 - Public catalogue metadata is not a complete schema or a live test. Products
   unavailable in the test account must be marked unverified.
@@ -178,7 +206,8 @@ routes. Existing test results remain scoped to the foundation in
   not establish resource-management authorization.
 - Public Cloud uses its own service APIs and application credentials. A role name
   alone does not prove a read-only boundary; verify region-specific permissions.
-- Upstream npm `0.15.2` returned 404 on 20 October 2026; the foundation currently
-  needs a separately built reviewed backend.
+- Upstream npm `0.15.2` returned 404 on 20 October 2026; the original edition and
+  controlled VPS reads need a separately built reviewed backend. Token-only
+  discovery and the native DNS/mail operations do not need it.
 - Disposable resources and any future remote host remain to be selected. Existing
   production services are not disposable test targets.

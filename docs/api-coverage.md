@@ -1,7 +1,10 @@
 # API coverage and write policy
 
-This is the plan for broad API support. The current runtime still exposes only
-reviewed reads through its three tools. Nothing in this document enables a route.
+This defines broad API support and the operation admission policy. Version 0.2
+implements full catalogue discovery and 17 reviewed handlers: nine reads and
+eight independently approved writes. Writes are disabled by default. The original
+three-tool read-only mode remains available. Nothing in this document alone
+enables a route.
 
 ## Catalogue baseline
 
@@ -82,7 +85,9 @@ uses pinned reviewed metadata, not a mutable documentation page fetched on deman
 
 Classify actual effects and information exposure per operation. A GET can expose
 credentials or personal content; a POST can be a search or a billable inference.
-The following is a planned default policy, not the current implementation:
+The following policy guides admission. The current reviewed writes all require
+explicit writable resource grants and fresh per-plan independent approval.
+Secret, content, purchasing and other unreviewed operations remain disabled:
 
 | Operation class                                              | Default treatment                                                                                                                        |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -103,6 +108,18 @@ No blanket "enable all writes" switch. Later automation policies can pre-authori
 a narrow low-risk operation/resource/argument range with expiry, execution count
 and budget limits. The user grants that policy through a trusted interface; the
 model cannot create or widen it. High-impact actions keep per-action approval.
+
+Current policy supports disabled, disposable-only and deliberately enabled writes.
+All modes still require explicit operation and resource grants; writable flags
+default false. DNS source grants and exact mailbox grants prevent a test resource
+from widening access to the rest of a live zone or mail hosting. Update/delete
+under a named DNS grant must identify the expected source; the record ID must
+exist within that name. Previews include only that name's records.
+
+The first write set is DNS create/update/delete, mailbox alias add/delete, and
+forwarding add/update/delete. DNS updates change only target and TTL. Forwarding
+disable previews the documented removal of all recipients. These handlers have
+fixture coverage; disposable live mutation qualification is a separate gate.
 
 ## Plan, approve, execute and verify
 
@@ -134,9 +151,11 @@ For multi-step changes, show the sequence, dependencies and failure points in th
 plan. Do not promise an atomic transaction or universal undo. A batch must expose
 partial progress and any action that requires a new approval.
 
-The journal stores redacted plans, policy/approval decisions, resource references,
-provider request/job IDs, timestamps and outcomes. Protect it as customer data;
-never store credentials or full message/file content merely to obtain an audit log.
+The current journal stores plans screened for known secrets, approval/state events,
+resource references, timestamps and outcomes. It does not retain provider request
+or job IDs; asynchronous adapters need that support before admission. Protect the
+journal as customer data, and never store credentials or full message/file content
+merely to obtain an audit log.
 
 ## Authentication, rate limits and test gates
 

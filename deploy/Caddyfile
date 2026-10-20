@@ -1,0 +1,8 @@
+{
+	admin off
+}
+
+{$INFOMANIAK_AI_HOSTNAME} {
+	reverse_proxy gateway:8787
+	header -Server
+}

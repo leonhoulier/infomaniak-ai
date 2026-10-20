@@ -1,31 +1,44 @@
 {
   "name": "infomaniak-ai",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "An unofficial, read-only Infomaniak AI plugin built on the existing MCP server.",
+  "description": "An unofficial Infomaniak AI plugin with API discovery, scoped reads and independently approved writes.",
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "bin": {
-    "infomaniak-ai": "dist/server.js"
+    "infomaniak-ai": "dist/server.js",
+    "infomaniak-ai-admin": "dist/admin.js"
   },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test tests/*.test.mjs",
+    "test": "npm run build && node --test --test-concurrency=2 tests/*.test.mjs",
     "doctor": "node dist/server.js --doctor",
     "format:check": "prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "package": "npm run build && node scripts/package.mjs",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "zod-to-json-schema": "3.25.2"
   },
   "devDependencies": {
     "@types/node": "22.19.19",
     "prettier": "3.8.3",
     "typescript": "5.9.3"
-  }
+  },
+  "files": [
+    "dist",
+    "data",
+    "skills",
+    ".claude-plugin",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ]
 }

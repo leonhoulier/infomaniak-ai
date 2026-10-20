@@ -1,0 +1,37 @@
+name: infomaniak-ai
+services:
+  gateway:
+    build: ..
+    restart: unless-stopped
+    read_only: true
+    user: "${INFOMANIAK_AI_UID:-1000}:${INFOMANIAK_AI_GID:-1000}"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      INFOMANIAK_POLICY_FILE: /run/secrets/access.local.json
+      INFOMANIAK_API_TOKEN_FILE: /run/secrets/provider-token
+    volumes:
+      - ${INFOMANIAK_AI_PRIVATE_DIR:?Set a private absolute directory}/access.local.json:/run/secrets/access.local.json:ro
+      - ${INFOMANIAK_AI_PRIVATE_DIR}/provider-token:/run/secrets/provider-token:ro
+      - ${INFOMANIAK_AI_PRIVATE_DIR}/state:/var/lib/infomaniak-ai
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    expose: ["8787"]
+    networks: [gateway]
+  https:
+    image: caddy:2@sha256:685ae3d7c34d9b5f8caeddc5d14051db7bbd88ff1f5a2fa0c16bd8ca328fb7af
+    restart: unless-stopped
+    environment:
+      INFOMANIAK_AI_HOSTNAME: ${INFOMANIAK_AI_HOSTNAME:?Set your actual hostname}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [gateway]
+    depends_on: [gateway]
+networks:
+  gateway:
+volumes:
+  caddy_data:
+  caddy_config:

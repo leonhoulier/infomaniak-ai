@@ -8,3 +8,9 @@ coverage/
 *.tgz
 .DS_Store
 artifacts/
+__pycache__/
+*.sqlite
+*.sqlite-*
+runtime.lock
+mcp-token
+approval-key

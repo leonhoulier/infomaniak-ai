@@ -1,28 +1,39 @@
 {
   "name": "infomaniak-ai",
-  "version": "0.1.0",
-  "description": "Inspect Infomaniak infrastructure through a small, read-only MCP gateway.",
+  "version": "0.2.0",
+  "description": "Inspect Infomaniak infrastructure; optionally use scoped API operations and independently approved writes.",
   "license": "MIT",
-  "author": { "name": "infomaniak-ai contributors" },
+  "author": {
+    "name": "infomaniak-ai contributors"
+  },
   "userConfig": {
     "api_token": {
       "type": "string",
       "title": "Infomaniak API token",
-      "description": "An existing token for the read scopes you need. The gateway does not store it.",
+      "description": "Your own Infomaniak API token for the product scopes you need. Token-only discovery performs reads; a scoped policy is required for controlled writes.",
       "required": true,
       "sensitive": true
     },
     "backend_path": {
       "type": "file",
       "title": "Reviewed MCP server build",
-      "description": "Absolute path to the reviewed infomaniak-mcp-agent dist/server.js file.",
-      "required": true
+      "description": "Optional reviewed MCP backend for the original edition. Token-only discovery needs no backend.",
+      "required": false,
+      "default": ""
     },
     "backend_sha256": {
       "type": "string",
       "title": "MCP build SHA-256",
-      "description": "Checksum of that exact build. Review changes before replacing this value.",
-      "required": true
+      "description": "Required with backend_path; checksum of the reviewed entry file.",
+      "required": false,
+      "default": ""
+    },
+    "policy_file": {
+      "type": "file",
+      "title": "Optional API access policy",
+      "description": "Private access.local.json for the controlled API runtime. Without it, start token-only discovery or the optional original read-only MCP adapter.",
+      "required": false,
+      "default": ""
     }
   },
   "mcpServers": {
@@ -32,7 +43,8 @@
       "env": {
         "INFOMANIAK_API_TOKEN": "${user_config.api_token}",
         "INFOMANIAK_MCP_SERVER_PATH": "${user_config.backend_path}",
-        "INFOMANIAK_MCP_SHA256": "${user_config.backend_sha256}"
+        "INFOMANIAK_MCP_SHA256": "${user_config.backend_sha256}",
+        "INFOMANIAK_POLICY_FILE": "${user_config.policy_file}"
       }
     }
   }

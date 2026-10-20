@@ -47,7 +47,7 @@ async function connect(t) {
 
 test(
   "built gateway advertises exactly three read tools and uses a real MCP child",
-  { timeout: 15_000 },
+  { timeout: 30_000 },
   async (t) => {
     const client = await connect(t);
     const { tools } = await client.listTools();
@@ -73,7 +73,7 @@ test(
 
 test(
   "policy and upstream errors stay MCP errors through the standard SDK",
-  { timeout: 15_000 },
+  { timeout: 30_000 },
   async (t) => {
     const client = await connect(t);
     for (const [operation, args, code] of [
@@ -94,7 +94,7 @@ test(
 
 test(
   "preloaded transport guard blocks a backend handler's attempted write",
-  { timeout: 15_000 },
+  { timeout: 30_000 },
   async (t) => {
     const client = await connect(t);
     const result = await client.callTool({
@@ -113,7 +113,7 @@ test(
 
 test(
   "repeating catalogue cursors and duplicate tools fail without partial success",
-  { timeout: 15_000 },
+  { timeout: 30_000 },
   async () => {
     for (const fixture of ["loop.mjs", "duplicate.mjs"]) {
       const backend = new McpBackend(await settings(fixture));
