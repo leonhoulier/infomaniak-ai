@@ -55,7 +55,31 @@ filesystem and networking disabled. A forced process kill/restart and the real
 healthcheck command pass. Compose configuration and Caddy configuration validation
 also pass; neither proves public TLS or deployment on a VPS.
 
-## Live read-only evidence
+## Correction and update — reads checked against live response shapes
+
+The 11:39 UTC run below checked that each read succeeded, not what it returned.
+Comparing with live responses later showed three reads returned almost nothing:
+
+- `products.list` picked `name`, `type`, `status` and `fqdn`, which products do
+  not have, so it returned bare IDs. `/1/products` also pages at 15 items with
+  `{ page, pages }`, so an 18-product account silently got 15.
+- `mail.mailboxes.list` and `mail.mailbox.get` read `name` and `email`; the API
+  returns `mailbox_name` and `mailbox`.
+
+These are fixed (`per_page=1000`, and `pages > page` is now `incomplete_response`),
+and the test fixtures now use the real shapes. A new live run, GET-only and with
+writes disabled, passed: all 18 products with names, six mailboxes with names and
+addresses, one mailbox's detail, all 12 domains with UTC expiry dates, a DNS audit,
+NS and MX propagation compared with the zone, and refusal of an ungranted zone.
+One NS propagation attempt saw a Cloudflare timeout; it was reported as a failure,
+and three reruns agreed.
+
+The write qualification script (`scripts/qualify-writes.mjs`) was run live up to
+the first approval: it refused a name outside the disposable grant and planned a
+TXT record against the live zone. No approval was given, and the zone was
+unchanged afterwards. No live write has been made through this plugin yet.
+
+## Live read-only evidence (earlier run)
 
 At 11:39 UTC, 12 live checks passed through the controlled runtime and token-only
 discovery edition. They cover all nine reviewed reads, including firewall reads

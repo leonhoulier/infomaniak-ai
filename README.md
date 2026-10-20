@@ -2,6 +2,7 @@
 
 An independent, unofficial AI plugin for Infomaniak. Discover services, inspect
 resources, review an exact change, approve it independently, execute and verify.
+Not affiliated with or endorsed by Infomaniak.
 
 Version 0.2 has a local MCP server, an optional authenticated HTTP service, a
 human approval interface and a durable operation journal. The complete public
@@ -11,10 +12,10 @@ catalogue is searchable; execution is limited to reviewed handlers.
 | --------------------------------------------- | --------------------------------------------------------------------------- |
 | Public catalogue                              | 1,514 method/path pairs across 15 product groups                            |
 | Pinned public schemas                         | 16 selected operation definitions                                           |
-| Reviewed operations                           | 9 reads, 8 writes; VPS reads require the existing MCP adapter               |
+| Reviewed operations                           | 12 reads (3 diagnostics), 8 writes; VPS reads need the existing MCP adapter |
 | Writes                                        | Disabled on initialization; scoped grants and independent approval required |
 | Application deployment / VPS lifecycle writes | Not implemented                                                             |
-| Live compatibility                            | Read evidence exists; live write qualification is pending                   |
+| Live compatibility                            | Reads checked live; write qualification script ready, not yet run           |
 
 Catalogue discovery is not proof that an operation is implemented or permitted.
 See [coverage and safety](docs/api-coverage.md), [validation](docs/validation.md)
@@ -99,6 +100,22 @@ The policy-driven edition exposes eight tools:
 There is no MCP approval tool or generic HTTP/shell executor. Search can return
 disabled catalogue entries with the reason they cannot execute.
 
+Reviewed operations carry Infomaniak-specific `notes` in search results: which
+ID is which, the `.` zone apex, MX priority inside the target, UTC expiry dates,
+what the forwarding flags mean. The [skill](skills/infomaniak/SKILL.md) has the
+full table.
+
+### Read-only diagnostics
+
+| Operation         | What it checks                                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| `domains.expiry`  | Registration expiry in UTC, days left, expired/expiring/ok                                                 |
+| `dns.audit`       | SPF (missing, duplicate, `+all`, Infomaniak include), DMARC, DKIM delegation, MX, apex CNAME, low TTLs     |
+| `dns.propagation` | Google, Cloudflare and Quad9 answers for one name, compared with the zone; a failed lookup is disagreement |
+
+They read the stored zone and public resolvers. They are not mail delivery or
+signing tests.
+
 ## Controlled writes
 
 Start with explicitly disposable resources. An operator must grant all of:
@@ -123,6 +140,18 @@ Stale or expired plans cannot execute. Conflicting writes serialize through
 resource locks. Uncertain requests remain locked and reconcile through reads;
 mutations are never automatically retried. A verified provider state does not
 prove DNS propagation, delivery, SSH reachability or application health.
+
+To qualify writes on your own account, pick a zone and a throwaway mailbox and run:
+
+```sh
+INFOMANIAK_API_TOKEN=... node scripts/qualify-writes.mjs \
+  --account ACCOUNT_ID --zone example.com --mail-hosting MAIL_HOSTING_ID --mailbox throwaway
+```
+
+It only touches the DNS name `_infomaniak-ai-test` and the alias `ik-ai-test`,
+plans each change, waits for you to approve it with `node dist/admin.js approve`
+in a second terminal, then executes, reads back and finally checks that the zone
+and aliases match their starting state. It never approves anything itself.
 
 Use `writes: "enabled"` only after disposable live qualification and a deliberate
 policy review. It still requires writable resource grants, operation grants and
@@ -163,6 +192,24 @@ claude --plugin-dir .
 Select the optional private policy file for the controlled edition, or supply the
 reviewed backend path/checksum for the original edition. Manifest validation is
 separate from native-client onboarding, which has not been proven end to end.
+
+## Related projects
+
+This plugin grew out of contributions to two existing open-source projects, and
+reuses what was learned there:
+
+- [peaktwilight/infomaniak-cli](https://github.com/peaktwilight/infomaniak-cli),
+  a Python CLI for the Infomaniak API. Open pull requests add DNS propagation and
+  sync fixes, a DNS audit fix, hosting discovery, read-only mode, `--dry-run`
+  previews and mailbox commands.
+- [Mogacode-ma/infomaniak-mcp-agent](https://github.com/Mogacode-ma/infomaniak-mcp-agent),
+  a TypeScript MCP server with two-phase confirmation. Open pull requests add DNS
+  export/diff/propagation tools, token-only VPS inventory and firewall reads,
+  tests, read-only mode, alias deletion and mailbox forwarding.
+
+Use the CLI for scripting, the MCP server for a broad tool surface driven by an
+agent, and this plugin when you want scoped grants and approval by a separate
+human for every write.
 
 ## Optional hosting on Infomaniak
 

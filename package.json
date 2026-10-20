@@ -4,6 +4,11 @@
   "private": true,
   "description": "An unofficial Infomaniak AI plugin with API discovery, scoped reads and independently approved writes.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonhoulier/infomaniak-ai.git"
+  },
+  "homepage": "https://github.com/leonhoulier/infomaniak-ai#readme",
   "type": "module",
   "engines": {
     "node": ">=22.13"
