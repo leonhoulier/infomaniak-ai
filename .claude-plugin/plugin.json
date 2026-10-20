@@ -1,0 +1,39 @@
+{
+  "name": "infomaniak-ai",
+  "version": "0.1.0",
+  "description": "Inspect Infomaniak infrastructure through a small, read-only MCP gateway.",
+  "license": "MIT",
+  "author": { "name": "infomaniak-ai contributors" },
+  "userConfig": {
+    "api_token": {
+      "type": "string",
+      "title": "Infomaniak API token",
+      "description": "An existing token for the read scopes you need. The gateway does not store it.",
+      "required": true,
+      "sensitive": true
+    },
+    "backend_path": {
+      "type": "file",
+      "title": "Reviewed MCP server build",
+      "description": "Absolute path to the reviewed infomaniak-mcp-agent dist/server.js file.",
+      "required": true
+    },
+    "backend_sha256": {
+      "type": "string",
+      "title": "MCP build SHA-256",
+      "description": "Checksum of that exact build. Review changes before replacing this value.",
+      "required": true
+    }
+  },
+  "mcpServers": {
+    "infomaniak": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/server.js"],
+      "env": {
+        "INFOMANIAK_API_TOKEN": "${user_config.api_token}",
+        "INFOMANIAK_MCP_SERVER_PATH": "${user_config.backend_path}",
+        "INFOMANIAK_MCP_SHA256": "${user_config.backend_sha256}"
+      }
+    }
+  }
+}

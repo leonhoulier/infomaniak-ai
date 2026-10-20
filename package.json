@@ -1,0 +1,31 @@
+{
+  "name": "infomaniak-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An unofficial, read-only Infomaniak AI plugin built on the existing MCP server.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "infomaniak-ai": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "doctor": "node dist/server.js --doctor",
+    "format:check": "prettier --check .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "prettier": "3.8.3",
+    "typescript": "5.9.3"
+  }
+}
