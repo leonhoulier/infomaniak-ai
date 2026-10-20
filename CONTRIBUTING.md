@@ -1,7 +1,7 @@
 # Contributing
 
 Keep provider fixes in the upstream MCP where possible. This repository owns the
-plugin interface, capability policy, skills and application workflows.
+plugin interface, capability policy, skills and cross-product workflows.
 
 ```sh
 npm ci --ignore-scripts
@@ -20,6 +20,8 @@ does not establish safety. Dynamic generic API or shell execution is outside sco
 Mutation workflows need an execution/approval design and a disposable test target
 before implementation. A model-visible confirmation token is insufficient.
 Document independent approval, unknown outcomes, readback and restoration.
+Follow [API coverage and write policy](docs/api-coverage.md): importing documented
+routes does not admit them to execution, and fixture coverage is not live validation.
 
 Run the native Claude Code manifest validator when changing plugin metadata:
 

@@ -6,23 +6,47 @@ adapter; keep provider fixes upstream and product workflows here.
 
 ## Product promise
 
-Let a developer ship and operate an application on Infomaniak from their AI
-assistant: understand the project, choose a suitable target, produce a deployment
-plan, obtain approval, publish a preview, connect the domain, diagnose failures and
-restore the previous release. Every claimed result should have observable evidence.
+Let an Infomaniak customer understand and operate their services through an AI
+assistant, with broad read and write coverage and understandable control over
+changes. Discover the capability, inspect the selected resources, preview the
+change, approve it, execute it and verify the outcome.
 
-The initial user is a developer or small agency already using Infomaniak for
-hosting, domains, mail or VPS. They should not need to learn provider IDs and
-private API routes to complete a task. The current tools expose resources, but
-do not yet provide a consistent application/release workflow.
+The target is all supported, accessible Infomaniak API operations, including
+domains/DNS, mail, hosting and compute, collaboration, storage, media and account
+administration. Application deployment is one workflow within that product.
+Coverage must distinguish documented routes, implemented operations, actual
+permissions and verified behavior. No promise that every Manager feature has a
+supported public API, or that all products share one credential type.
+
+The initial user is a customer or small agency already using Infomaniak for
+domains, mail or VPS. They should not need to learn provider IDs or private API
+routes to complete a task. Safety must be enforced by the runtime as well as
+explained by the assistant.
+
+## Hosting choices
+
+The local plugin needs no hosted service. Each user's MCP client launches it on
+their computer and supplies that user's credentials. This remains a supported
+installation mode as the product grows.
+
+Offer a remote MCP service on Infomaniak when browser-based clients or shared
+access justify it. Start with an isolated single-owner instance on a suitable VPS;
+size it from measured load. Multi-user hosting is a later, separate release gate:
+it requires authenticated HTTPS, per-user credential isolation, authorization,
+durable operations and independently authenticated approval. An HTTP wrapper
+around today's stdio process is insufficient.
+
+Use the same catalogue, operation contracts and safety rules in both modes. A
+managed service must never use the operator's own Infomaniak token for customers.
+An Infomaniak-hosted gateway does not control the AI client's own data processing.
 
 ## What to learn from the benchmarks
 
-| Benchmark                | Useful pattern                                                     | Application here                                                                                 |
-| ------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| Vercel MCP               | Project/deployment/log workflows and permission-aware availability | Bind operations to one project, target and environment; show what the connection can actually do |
-| Cloudflare agent tooling | Skills, documentation and progressive capability discovery         | Three stable gateway tools; reveal the relevant operation schemas when requested                 |
-| Infomaniak               | Existing hosting, DNS, mail and compute products                   | Map those products honestly to supported workflows, with adapters per product                    |
+| Benchmark                | Useful pattern                                             | Application here                                                       |
+| ------------------------ | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Vercel MCP               | Resource workflows and permission-aware availability       | Report what this connection can actually do for the selected resources |
+| Cloudflare agent tooling | Skills, documentation and progressive capability discovery | Load relevant operation schemas on demand across a broad catalogue     |
+| Infomaniak               | Multiple API products and authentication systems           | Keep product boundaries, scope requirements and evidence explicit      |
 
 These are product design inferences, not claims of feature parity. A plugin does
 not supply a global edge network or replace the hosting platform's runtime.
@@ -31,118 +55,130 @@ Sources checked 20 October 2026:
 
 - [Vercel MCP tools](https://vercel.com/docs/agent-resources/vercel-mcp/tools)
 - [Cloudflare docs for agents](https://developers.cloudflare.com/docs-for-agents/)
-- [Cloudflare progressive discovery / Code Mode](https://developers.cloudflare.com/agents/tools/codemode/)
-- [Infomaniak Node.js hosting](https://www.infomaniak.com/en/hosting/nodejs-hosting)
-- [Claude Code plugin manifest](https://code.claude.com/docs/en/plugins-reference)
+- [Infomaniak API catalogue](https://developer.infomaniak.com/docs/api)
+- [Infomaniak API overview and restrictions](https://www.infomaniak.com/en/support/faq/2581/discover-the-infomaniak-api)
+- [Infomaniak API tokens](https://www.infomaniak.com/en/support/faq/2582/add-and-manage-infomaniak-api-tokens)
+- [Infomaniak Public Cloud identity](https://docs.infomaniak.cloud/identity/)
+- [MCP local and remote transports](https://ts.sdk.modelcontextprotocol.io/client)
 
-## First-release goals
+## Acceptance goals
 
 Targets below are acceptance criteria, not measured results:
 
-1. A configured developer identifies accessible accounts and relevant resources
-   in under five minutes, without a browser session.
-2. The initial MCP interface always has three tools. Available read schemas load
-   on demand; absent capabilities are reported explicitly.
-3. Every rejected mutation is blocked before forwarding a tool call. The reviewed
-   adapter's fetch transport also rejects non-GET requests and redirects.
-4. A clean install can run fixture tests without credentials or a live account.
-5. A supported existing application can eventually reach a verified preview URL
-   from a repository, then survive a tested rollback. This is the next release
-   gate, not a capability of the foundation.
+1. A configured user identifies accessible accounts and relevant resources in
+   under five minutes, without a Manager browser session.
+2. Every catalogued operation reports its implementation, policy, authentication
+   requirements and validation status. Search returns a small relevant selection.
+3. A model cannot grant itself access, select another user's credentials, or
+   approve its own mutation. All new catalogue entries start disabled.
+4. Every enabled write has a preview, appropriate approval, bounded execution,
+   recorded outcome and verification. Unknown outcomes require reconciliation.
+5. Fixture tests run without credentials. Mutating live tests use explicitly
+   designated disposable targets; lack of a test product remains visible.
+6. Users can install locally without operating a server. Remote clients receive
+   equivalent policy protection when a hosted edition is released.
 
 ## User stories
 
-- As an Infomaniak customer, I can identify the correct account and distinguish
-  a web hosting from a VPS or Public Cloud project before choosing a target.
-- As a developer, I can ask which operations work through this exact adapter
-  build, rather than receive a plan based on unavailable provider features.
-- As an agency developer, I can bind a deployment to a project and environment
-  so that a preview cannot overwrite a production domain.
-- As an operator, I can distinguish provider state, application health, an
-  incomplete observation and an unsuccessful operation.
-- As a maintainer, I can update the provider adapter independently of the plugin
-  and detect incompatible schemas before releasing it.
+- As a customer, I can identify the correct account and distinguish VPS Lite,
+  managed hosting and Public Cloud before choosing a resource.
+- As an operator, I can inspect resources across products and see unavailable
+  operations and missing access without the assistant guessing API paths.
+- As a customer changing DNS or mail, I can review the exact before/after values,
+  affected resources, risks and recovery options before approving execution.
+- As an agency, I can restrict a connection to selected accounts and resources,
+  with stronger protection for production and customer-visible actions.
+- As a maintainer, I can update API schemas and provider adapters independently,
+  review coverage changes and detect incompatible behavior before release.
 
-## P0: foundation, implemented first
+## P0: foundation, implemented
 
-- A standalone MCP stdio gateway with `infomaniak_status`, `infomaniak_search`
-  and `infomaniak_read`.
-- A fixed allowlist of reviewed reads. Tool hints, names suggested by the model,
-  and confirmation tokens cannot grant write access.
-- Explicit account IDs for account-scoped listings; never silently select the
-  first account. Provider credentials still define actual resource permissions.
-- A checksum-verified, explicitly selected local backend executable, with browser
-  authentication disabled and a narrow child environment.
-- Output redaction, bounded responses, bounded catalogue pagination and clear
-  errors for missing operations. Availability is advertised, not proof of scopes.
-- A portable skill, a native Claude Code plugin manifest, and generic MCP launch
-  instructions. No global client settings modified during development.
+- Local MCP stdio gateway with `infomaniak_status`, `infomaniak_search` and
+  `infomaniak_read`.
+- Fixed allowlist of reviewed reads; hints and model-visible confirmation tokens
+  cannot grant write access. A GET-only fetch guard protects the reviewed adapter.
+- Explicit accounts for account-scoped listings, a selected/checksummed backend,
+  Manager browser auth disabled, narrow child environment and bounded responses.
+- Output redaction, clear missing-operation errors, portable skill and a native
+  Claude Code plugin manifest. No global client settings changed.
 
-## P1: one complete application workflow
+This is a read-only foundation, not the completed broad-coverage product.
 
-Choose one release engine after a disposable test target is available. Managed
-Node.js hosting is a native option if its authentication and release semantics can
-be verified. For VPS hosting, evaluate an existing engine such as Coolify before
-building a scheduler, image registry or deployment controller ourselves. The plugin
-should coordinate a documented deployment API, not expose arbitrary SSH commands.
+## P1: catalogue and controlled execution
 
-Coolify documents queued deployments, separate preview environments and preview
-API reads/writes. That makes it a plausible VPS adapter, not a verified integration.
-Do not install it on an existing server without reviewing capacity, port conflicts,
-recovery and the user's intended changes. Dokploy is another candidate; support
-one engine first rather than implementing both speculatively.
+Build the [API coverage registry and write policy](api-coverage.md) first. Import
+public operation metadata and available schemas with versioned provenance;
+track reviewed additions and removals. Discoverability does not grant execution.
+Keep separately documented service APIs, undocumented routes and Manager-only
+behavior visible as separate categories.
 
-- [Coolify deployment model](https://coolify.io/docs/applications/deployments/overview)
-- [Coolify preview API and lifecycle](https://coolify.io/docs/applications/deployments/preview-deployments)
-- [Dokploy previews](https://docs.dokploy.com/docs/core/applications/preview-deployments)
+Keep a small MCP interface as the catalogue grows. Future planning, execution
+and operation-status tools can join the existing three tools; do not expose
+thousands of eagerly loaded tool definitions or arbitrary HTTP/JavaScript.
 
-Deliver one vertical slice before adding more product families:
+Implement one shared write lifecycle: plan, independent approval, execution,
+readback and outcome journal. Approval binds the exact account, resources,
+arguments, operation version, expiry and observed preconditions. Sensitive
+reads and external messages also need appropriate consent.
 
-1. Inspect repository metadata without executing project code.
-2. Bind `.infomaniak/project.json` to explicit account, application and environment.
-3. Check framework/runtime compatibility and build requirements. Detect
-   Vercel/Cloudflare-specific dependencies rather than promising portability.
-4. Show exact resource changes, cost implications and a restoration plan.
-5. Get approval through the host UI, outside the model's own tool arguments.
-6. Build an immutable release and deploy to a separate preview hostname.
-7. Check build outcome, HTTP response, DNS and TLS; return evidence or failure.
-8. Promote only the approved release; restore the previously verified release.
+Acceptance: in an isolated fixture environment, attempted self-approval,
+cross-account access, stale plans, replayed approvals and duplicate uncertain
+writes fail. A supported write completes against a disposable live target,
+including readback and tested failure handling, before that operation is enabled.
 
-Acceptance: a disposable application completes this loop and a failed deployment
-leaves production unchanged. Timeouts enter an unknown-outcome state until readback
-reconciles them; mutations are never blindly replayed.
+## P2: expand reads and writes by product
 
-## P2: operate and distribute
+Prioritize domains/DNS, mail and the user's VPS products, then expand through the
+entire catalogue. Each product adds useful read and write operations together
+once its safety and test requirements are met. Do not wait for every read in
+every product before proving a bounded write.
 
-- Project-scoped logs, deploy history, runtime errors, health and drift.
-- Secret references and environment-key management without exposing secret values.
-- A durable operation journal, cancellation, resumable polling and idempotency
-  where the provider supports it.
-- Multi-project environments, team policy and protected production approvals.
-- Public Cloud/container adapters and optional constrained VPS runners.
-- Signed/pinned distributions, compatibility matrix, clean-machine installation
-  tests and client-specific onboarding. Remote multi-user MCP requires a separate
-  authentication and tenant-isolation design.
+- Reuse reviewed operations from the existing MCP. Contribute provider fixes and
+  useful resource primitives upstream in small changes.
+- Add typed adapters for supported APIs the existing MCP does not cover. They use
+  the same registry and execution policy; no unrestricted API escape hatch.
+- Keep credential-returning, destructive, costly and customer-visible operations
+  discoverable but disabled until their additional controls and tests exist.
+- Add cross-resource workflows after their component operations are validated:
+  DNS changes, mail setup, compute management and application deployment.
 
-## Scope limits
+VPS guest inspection through SSH is a separate capability from a provider API.
+If added, use reviewed probes and constrained actions. Do not expose arbitrary
+shell execution as a shortcut to missing provider operations.
 
-The foundation has no deployment, promotion, rollback, arbitrary API execution,
-shell/SSH execution or billing actions. It does not expose credential-returning
-routes. A plan is not an execution, and a two-phase token returned to the model is
-not independent human approval. Infrastructure changes need a later runtime gate.
+Application previews and recovery need verified provider release primitives or
+a typed adapter for an established release engine. Coolify and Dokploy are
+candidates, not dependencies of broad API coverage or verified integrations.
+Do not install a release engine on an existing server as part of API discovery.
 
-## Blocking questions and evidence
+## P3: remote access and distribution
 
-- Engineering: which supported authentication path permits unattended application
-  deployment? The current adapter uses Manager sessions for several hosting actions.
-- Provider/API: what preview, immutable-release and rollback primitives exist on
-  the chosen product? They have not been established for this plugin.
-- Product: the first test application and disposable hosting target are still to
-  be selected. Existing live services are not disposable by default.
-- Distribution: npm returned 404 for upstream `0.15.2` on 20 October 2026 despite
-  the repository carrying that version. The prototype requires a local audited
-  build; it must not invent a working package-install command.
+- Infomaniak-hosted remote MCP, starting with single-owner deployment.
+- Separate MCP authentication from downstream Infomaniak credentials; verify the
+  product scopes available through any delegated OAuth flow before relying on it.
+- Tenant isolation, per-client consent, protected approvals, encrypted credential
+  storage, retention/deletion controls and tested recovery before multi-user use.
+- Signed/pinned distributions, compatibility checks, clean-machine installation
+  and client-specific onboarding. Preserve the local installation mode.
+- Explicitly bounded automation policies for repeatable low-risk work after
+  interactive writes are proven. No global approval bypass.
 
-Ship the foundation first, prove one preview/rollback workflow next, then expand
-operations and distribution. No fixed calendar promise until the deployment
-adapter and test environment are validated.
+## Current limits and unresolved evidence
+
+The current runtime has no writes, remote HTTP endpoint, deployment, promotion,
+rollback, SSH execution or billing actions. It does not expose credential-returning
+routes. Existing test results remain scoped to the foundation in
+[validation.md](validation.md); the controls described for P1–P3 are planned.
+
+- Public catalogue metadata is not a complete schema or a live test. Products
+  unavailable in the test account must be marked unverified.
+- Several existing hosting actions use Manager sessions. A supported unattended
+  public API authentication path must be established before enabling them here.
+- Delegated OAuth scopes must be tested per product; login support alone does
+  not establish resource-management authorization.
+- Public Cloud uses its own service APIs and application credentials. A role name
+  alone does not prove a read-only boundary; verify region-specific permissions.
+- Upstream npm `0.15.2` returned 404 on 20 October 2026; the foundation currently
+  needs a separately built reviewed backend.
+- Disposable resources and any future remote host remain to be selected. Existing
+  production services are not disposable test targets.

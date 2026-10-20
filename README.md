@@ -1,14 +1,32 @@
 # Infomaniak AI
 
-An independent, unofficial AI plugin for Infomaniak. The product goal is a complete
-application workflow: inspect → plan → approve → preview → verify → promote or restore.
+An independent, unofficial AI plugin for Infomaniak. The product goal is broad
+coverage of Infomaniak's supported APIs: discover → inspect → plan → approve →
+execute → verify, across products and accounts.
 
 **This is a local read-only foundation.** It does not deploy, promote, roll back or
-execute SSH. See [the product plan](docs/product.md) for the phased scope.
+execute SSH. See [the product plan](docs/product.md) and
+[API coverage and write policy](docs/api-coverage.md) for the phased scope.
 
 The plugin reuses [infomaniak-mcp-agent](https://github.com/Mogacode-ma/infomaniak-mcp-agent)
 through MCP. Provider fixes remain separate upstream contributions. This repository
 contains the plugin policy, discovery interface, skill and product workflows.
+
+## Hosting
+
+No server hosting is required for the current plugin. An MCP client on the user's
+computer starts the plugin locally; that process connects to Infomaniak's API
+using the user's configured credentials.
+
+A future remote MCP service can run on Infomaniak for browser-based clients and
+shared access. Self-hosted instances and a managed multi-user service are separate
+deployment choices. They need authenticated HTTPS, isolated credentials and
+operation state, and an approval interface before remote writes can be enabled.
+The current stdio server does not provide those features.
+
+Local and remote operation should share the same API catalogue and safety policy.
+Hosting the gateway on Infomaniak does not determine where the AI client processes
+the results it receives. See [the architecture](docs/architecture.md).
 
 ## Three tools
 
@@ -87,7 +105,10 @@ not prove token scopes. Status connects to the adapter and reads its catalogue.
   host read-only, and it does not implement multi-user tenant isolation.
 
 For future writes, approval must be outside the model-controlled request, bound to
-the exact project/environment/change, and followed by readback and failure recovery.
+the exact account/resources/change, and followed by readback and failure recovery.
+Full catalogue discovery will not automatically enable new operations. Secrets,
+external messages, purchases, deletion and service disruption need explicit policy
+beyond ordinary inventory reads.
 
 ## Development
 

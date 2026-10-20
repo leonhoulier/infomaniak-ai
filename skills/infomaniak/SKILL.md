@@ -1,6 +1,6 @@
 ---
 name: infomaniak
-description: Inspect Infomaniak accounts, hosting, domains, DNS, mail and VPS through the independent Infomaniak AI plugin. Use when planning an application deployment or diagnosing Infomaniak infrastructure. The current release only performs reviewed reads.
+description: Inspect Infomaniak accounts, hosting, domains, DNS, mail and VPS through the independent Infomaniak AI plugin. Use when inspecting services, planning changes or diagnosing Infomaniak infrastructure. The current release only performs reviewed reads.
 ---
 
 # Infomaniak
@@ -37,6 +37,22 @@ to a generic API executor to work around the policy.
 - Do not request tokens, cookies, passwords, private keys or 2FA codes in chat.
   Configuration uses the client's secret store or the process environment.
 - Keep returned data relevant to the question; do not repeat credential values.
+
+## Plan changes across products
+
+Broad API read/write coverage is the product goal; the current release only
+executes the reviewed reads returned by status/search. A documented route or a
+future roadmap item is not an available tool. Never bypass the gateway to gain
+write access.
+
+For a proposed change, state the selected account and actual resources, observed
+state, exact desired effects, service impact, known costs, missing evidence and
+recovery limits. Mark it as a plan. Independent approval, a write-capable runtime
+and operation-specific verification are still required; none are supplied by
+the current release. Do not claim a provider dry run or universal undo exists.
+
+The current plugin runs locally without server hosting. A remote service on
+Infomaniak is planned; it is not an existing endpoint users can connect to.
 
 ## Plan an application deployment
 
