@@ -33,15 +33,38 @@ export class FixtureApi {
           { id: 20, name: "Other" },
         ];
       if (path.startsWith("/1/products"))
-        return [{ id: 30, type: "mail", billing_contact: "private@example.net" }];
+        return [
+          {
+            id: 30,
+            account_id: 10,
+            service_id: 3,
+            service_name: "email_hosting",
+            customer_name: "example.com",
+            billing_contact: "private@example.net",
+          },
+        ];
       if (path.includes("/records")) return clone(this.records);
       if (path.endsWith("/aliases")) return clone(this.aliases);
       if (path.endsWith("/forwarding_addresses")) return clone(this.forwarding);
-      if (path.endsWith("/mailboxes"))
+      if (path.split("?")[0].endsWith("/mailboxes"))
         return [
-          { name: "hello", email: "hello@example.com", users: [{ email: "private@example.net" }] },
+          {
+            mailbox_name: "hello",
+            mailbox: "hello@example.com",
+            type: null,
+            is_free_mail: false,
+            is_limited: false,
+            users: [{ email: "private@example.net" }],
+          },
         ];
-      return { name: "hello", email: "hello@example.com", users: [{ password: "sensitive" }] };
+      return {
+        mailbox_name: "hello",
+        mailbox: "hello@example.com",
+        type: null,
+        is_free_mail: false,
+        is_limited: true,
+        users: [{ password: "sensitive" }],
+      };
     }
     if (this.gate) await this.gate;
     if (this.failure === "rejected") throw new ApiError(false, 403);

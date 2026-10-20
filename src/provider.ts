@@ -120,6 +120,8 @@ export class PublicApi implements Api {
         if (object.result === "success" || Object.hasOwn(object, "data")) {
           if (
             object.has_more === true ||
+            // Infomaniak's own pagination envelope: { page, pages, items_per_page, total }.
+            (typeof object.pages === "number" && Number(object.page ?? 1) < object.pages) ||
             (object.pagination &&
               typeof object.pagination === "object" &&
               Number((object.pagination as Record<string, unknown>).last_page) >

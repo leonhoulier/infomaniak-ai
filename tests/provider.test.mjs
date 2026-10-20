@@ -60,10 +60,18 @@ test("incomplete pagination cannot be silently accepted as a complete preconditi
   for (const data of [
     { data: [], has_more: true },
     { data: [], pagination: { current_page: 1, last_page: 2 } },
+    // The shape /1/products and /1/mail_hostings/{id}/mailboxes actually return.
+    { result: "success", data: [], page: 1, pages: 2, items_per_page: 15, total: 18 },
   ]) {
     const api = new PublicApi("fixture", new RequestQueue(0), async () => Response.json(data));
     await assert.rejects(api.request("GET", "/2/x"), { code: "incomplete_response" });
   }
+});
+test("a single complete Infomaniak page is accepted", async () => {
+  const api = new PublicApi("fixture", new RequestQueue(0), async () =>
+    Response.json({ result: "success", data: [1], page: 1, pages: 1, total: 1 }),
+  );
+  assert.deepEqual(await api.request("GET", "/1/products"), [1]);
 });
 test("the shared request queue serializes concurrent callers", async () => {
   const queue = new RequestQueue(0),

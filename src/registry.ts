@@ -180,6 +180,36 @@ const recoveryDns =
   "Restoring a record is a new approved change. DNS caches can retain old values until TTL expiry; no universal undo or atomicity is promised.";
 const recoveryMail =
   "Restoring this configuration requires a separate approved change. Already delivered, forwarded or rejected mail cannot be recalled.";
+/** Product fields worth showing; the rest is billing and rights metadata. */
+export function productSummary(value: unknown): Record<string, unknown> {
+  const r = object(value);
+  return Object.fromEntries(
+    [
+      "id",
+      "account_id",
+      "service_id",
+      "service_name",
+      "customer_name",
+      "internal_name",
+      "expired_at",
+      "is_locked",
+      "has_maintenance",
+      "has_operation_in_progress",
+    ]
+      .filter((k) => Object.hasOwn(r, k))
+      .map((k) => [k, r[k]]),
+  );
+}
+const mailboxSummary = (value: unknown): Record<string, unknown> => {
+  const r = object(value);
+  return {
+    mailbox_name: r.mailbox_name,
+    email: r.mailbox,
+    type: r.type ?? null,
+    is_free_mail: r.is_free_mail,
+    is_limited: r.is_limited,
+  };
+};
 function mutation(o: Omit<Operation, "revision" | "write">): Operation {
   return { ...o, revision: "1", write: true };
 }
@@ -208,14 +238,9 @@ const operations: Operation[] = [
     path: "/1/products",
     input: z.object(base).strict(),
     read: async (api, a) =>
-      list(await api.request("GET", "/1/products?account_id=" + a.account_id)).map((value) => {
-        const r = object(value);
-        return Object.fromEntries(
-          ["id", "name", "type", "service_id", "account_id", "status", "fqdn"]
-            .filter((k) => Object.hasOwn(r, k))
-            .map((k) => [k, r[k]]),
-        );
-      }),
+      list(
+        await api.request("GET", "/1/products?account_id=" + a.account_id + "&per_page=1000"),
+      ).map(productSummary),
   }),
   reading({
     id: "dns.records.list",
@@ -236,12 +261,12 @@ const operations: Operation[] = [
     resource: scopeMail,
     input: z.object({ ...base, mail_hosting_id: id }).strict(),
     read: async (api, a) =>
-      list(await api.request("GET", "/1/mail_hostings/" + a.mail_hosting_id + "/mailboxes")).map(
-        (v) => {
-          const r = object(v);
-          return { name: r.name, email: r.email, type: r.type };
-        },
-      ),
+      list(
+        await api.request(
+          "GET",
+          "/1/mail_hostings/" + a.mail_hosting_id + "/mailboxes?per_page=1000",
+        ),
+      ).map(mailboxSummary),
   }),
   reading({
     id: "mail.mailbox.get",
@@ -251,16 +276,7 @@ const operations: Operation[] = [
     path: "/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}",
     resource: scopeMail,
     input: z.object(mail).strict(),
-    read: async (api, a) => {
-      const r = object(await api.request("GET", mailBase(a)));
-      return {
-        name: r.name,
-        email: r.email,
-        type: r.type,
-        is_free: r.is_free,
-        is_limited: r.is_limited,
-      };
-    },
+    read: async (api, a) => mailboxSummary(await api.request("GET", mailBase(a))),
   }),
   reading({
     id: "mail.aliases.list",

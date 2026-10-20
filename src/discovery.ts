@@ -3,6 +3,7 @@ import { loadCatalogue, type ApiCatalogue } from "./catalogue.js";
 import { boundedResult, PluginError } from "./errors.js";
 import { PublicApi, RequestQueue, list, object, type Api } from "./provider.js";
 import { createReadOnlyFetch } from "./policy.js";
+import { productSummary } from "./registry.js";
 
 /** Public onboarding: only the user's token, no author's account, backend or state directory. */
 export class Discovery {
@@ -65,18 +66,13 @@ export class Discovery {
         if (!this.accounts) await this.accountList();
         if (!this.accounts!.has(a.account_id))
           throw new PluginError("access_denied", "Select an account returned for this token.");
-        const rows = list(await this.api.request("GET", "/1/products?account_id=" + a.account_id));
-        result = {
-          operation: args.operation,
-          data: rows.map((value) => {
-            const r = object(value);
-            return Object.fromEntries(
-              ["id", "name", "type", "service_id", "account_id", "status", "fqdn"]
-                .filter((k) => Object.hasOwn(r, k))
-                .map((k) => [k, r[k]]),
-            );
-          }),
-        };
+        const rows = list(
+          await this.api.request(
+            "GET",
+            "/1/products?account_id=" + a.account_id + "&per_page=1000",
+          ),
+        );
+        result = { operation: args.operation, data: rows.map(productSummary) };
       }
     } else if (name === "infomaniak_catalogue" || name === "infomaniak_search") {
       const searching = name === "infomaniak_search";

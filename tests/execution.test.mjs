@@ -206,11 +206,29 @@ test("tenant operation state and account inventory are isolated", async (t) => {
   const accounts = await f.engine.read("accounts.list", { account_id: 10 });
   assert.deepEqual(accounts.data, [{ id: 10, name: "Owner" }]);
   const products = await f.engine.read("products.list", { account_id: 10 });
-  assert.deepEqual(products.data, [{ id: 30, type: "mail" }]);
+  assert.deepEqual(products.data, [
+    {
+      id: 30,
+      account_id: 10,
+      service_id: 3,
+      service_name: "email_hosting",
+      customer_name: "example.com",
+    },
+  ]);
+  assert(f.api.calls.some((c) => c.path === "/1/products?account_id=10&per_page=1000"));
   const mailboxes = await f.engine.read("mail.mailboxes.list", {
     account_id: 10,
     mail_hosting_id: 30,
   });
+  assert.deepEqual(mailboxes.data, [
+    {
+      mailbox_name: "hello",
+      email: "hello@example.com",
+      type: null,
+      is_free_mail: false,
+      is_limited: false,
+    },
+  ]);
   assert(!JSON.stringify(mailboxes).includes("private@example.net"));
 });
 test("disabled writes, disposable-only grants and duplicate credentials fail closed", async (t) => {
