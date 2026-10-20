@@ -49,6 +49,13 @@ test("full public catalogue is discoverable; metadata cannot authorize execution
   } while (offset !== null);
   assert.equal(count, 1514);
 });
+test("search returns Infomaniak facts with reviewed operations", async (t) => {
+  const f = await fixture(t);
+  const search = await f.call("infomaniak_search", { query: "dns.records.list", limit: 1 });
+  const op = search.operations.find((o) => o.operation === "dns.records.list");
+  assert(op.notes.some((n) => n.includes("MX priority")));
+  assert(op.notes.some((n) => n.includes('source "."')));
+});
 test("plans do not mutate, self-approval is unavailable, independent approval binds exact effects", async (t) => {
   const f = await fixture(t),
     p = await f.engine.plan("dns.record.create", createArgs);

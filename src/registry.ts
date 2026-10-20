@@ -47,6 +47,8 @@ export interface Operation {
   input: z.AnyZodObject | z.ZodEffects<z.AnyZodObject>;
   revision: string;
   write: boolean;
+  /** Infomaniak-specific facts a model needs to use this operation correctly. */
+  notes?: string[];
   requiresBackend?: boolean;
   resource?: (args: Args) => { kind: ResourceKind; key: string };
   read?: (api: Api, args: Args, principal: Principal, backend?: Backend) => Promise<unknown>;
@@ -219,6 +221,9 @@ function reading(o: Omit<Operation, "revision" | "write">): Operation {
 const operations: Operation[] = [
   reading({
     id: "accounts.list",
+    notes: [
+      "An account ID is not a product ID, a mail hosting ID or a service_id; never substitute one for another.",
+    ],
     product: "Core Resources",
     summary: "List only the accounts granted to this connection.",
     method: "GET",
@@ -232,6 +237,11 @@ const operations: Operation[] = [
   }),
   reading({
     id: "products.list",
+    notes: [
+      "service_name tells products apart: domain, email_hosting, hosting (some accounts report web hosting as web_hosting), cloud (VPS / Cloud Server, service_id 25; not OpenStack Public Cloud).",
+      "For an email_hosting product, id is the mail_hosting_id used by mail operations.",
+      "expired_at is a Unix timestamp in UTC; the Manager shows local time.",
+    ],
     product: "Core Resources",
     summary: "Inspect products in an explicitly granted account.",
     method: "GET",
@@ -244,6 +254,11 @@ const operations: Operation[] = [
   }),
   reading({
     id: "dns.records.list",
+    notes: [
+      'The zone apex has source "." in the API; zone files write it as @.',
+      'MX priority is part of the target ("10 mx.example.com"); there is no priority field.',
+      "TXT targets can include their quotes; compare targets literally.",
+    ],
     product: "Domain & Zone",
     summary: "Inspect the complete DNS record list in a granted zone.",
     method: "GET",
@@ -254,6 +269,10 @@ const operations: Operation[] = [
   }),
   reading({
     id: "mail.mailboxes.list",
+    notes: [
+      "mailbox_name is the part before @; pass it, not the full address, to mailbox operations.",
+      "mail_hosting_id is the email_hosting product id, not the account id.",
+    ],
     product: "Mail Services",
     summary: "List mailbox names and addresses in a granted mail hosting.",
     method: "GET",
@@ -270,6 +289,7 @@ const operations: Operation[] = [
   }),
   reading({
     id: "mail.mailbox.get",
+    notes: ["mailbox_name is the part before @."],
     product: "Mail Services",
     summary: "Inspect mailbox metadata without users, messages or credential fields.",
     method: "GET",
@@ -280,6 +300,7 @@ const operations: Operation[] = [
   }),
   reading({
     id: "mail.aliases.list",
+    notes: ["Aliases are returned as the part before @; alias writes take the same form."],
     product: "Mail Services",
     summary: "Inspect aliases for a mailbox in a granted hosting.",
     method: "GET",
@@ -290,6 +311,11 @@ const operations: Operation[] = [
   }),
   reading({
     id: "mail.forwarding.get",
+    notes: [
+      "has_dont_deliver=true means no local copy is kept: mail only goes to the recipients.",
+      "Recipients with is_enabled=false forward nothing.",
+      "Mailbox forwarding is separate from hosting-level redirections.",
+    ],
     product: "Mail Services",
     summary: "Inspect forwarding recipients and delivery flags.",
     method: "GET",
@@ -329,6 +355,7 @@ const operations: Operation[] = [
   }),
   mutation({
     id: "dns.record.update",
+    notes: ["Only target and TTL change; a different source or type needs delete + create."],
     product: "Domain & Zone",
     summary: "Plan a DNS target/TTL update; source/type changes require a different record.",
     method: "PUT",
@@ -494,6 +521,7 @@ for (const action of ["add", "delete"] as const)
 operations.push(
   mutation({
     id: "mail.forwarding.update",
+    notes: ["Disabling forwarding removes every recipient; the plan shows the loss."],
     product: "Mail Services",
     summary: "Plan forwarding settings, including recipient loss when forwarding is disabled.",
     method: "PUT",
@@ -551,6 +579,9 @@ for (const [name, backendName, fields, scope] of [
     reading({
       id: name,
       product: "VPS (reviewed MCP adapter)",
+      notes: [
+        "cloud products are VPS. The public API offers list and firewall reads; there is no lifecycle (start/stop/reboot) API.",
+      ],
       summary: "Use the existing reviewed token-only MCP read for " + name + ".",
       method: "GET",
       path: name === "vps.list" ? "/2/vps" : "/2/vps/{vps_id}/firewall",

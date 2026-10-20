@@ -93,3 +93,25 @@ test("the shared request queue serializes concurrent callers", async () => {
   await Promise.all([first, second]);
   assert.deepEqual(events, ["first", "first done", "second"]);
 });
+test("rejections carry Infomaniak's error code but never its description", async () => {
+  const api = new PublicApi("fixture-secret", new RequestQueue(0), async () =>
+    Response.json(
+      {
+        result: "error",
+        error: { code: "alias_does_not_exist", description: "echo fixture-secret" },
+      },
+      { status: 400 },
+    ),
+  );
+  await assert.rejects(api.request("DELETE", "/1/mail_hostings/1/mailboxes/a/aliases/b"), (e) => {
+    assert.equal(e.code, "provider_error");
+    assert.equal(e.upstream, "alias_does_not_exist");
+    assert.match(e.message, /HTTP 400\. Infomaniak code: alias_does_not_exist\./);
+    assert(!e.message.includes("fixture-secret"));
+    return true;
+  });
+  const odd = new PublicApi("fixture", new RequestQueue(0), async () =>
+    Response.json({ error: { code: "Bearer abc; drop" } }, { status: 403 }),
+  );
+  await assert.rejects(odd.request("GET", "/2/x"), (e) => e.upstream === undefined);
+});

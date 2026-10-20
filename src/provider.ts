@@ -3,13 +3,29 @@ export class ApiError extends PluginError {
   constructor(
     public readonly uncertain: boolean,
     public readonly status?: number,
+    /** Infomaniak's error code, e.g. "alias_does_not_exist"; never the description text. */
+    public readonly upstream?: string,
   ) {
     super(
       uncertain ? "unknown_outcome" : "provider_error",
-      uncertain
+      (uncertain
         ? "The provider outcome is uncertain. Reconcile this operation before another mutation."
-        : "The provider rejected the request. Check access, resource state and documented requirements.",
+        : "The provider rejected the request. Check access, resource state and documented requirements.") +
+        (status ? " HTTP " + status + "." : "") +
+        (upstream ? " Infomaniak code: " + upstream + "." : ""),
     );
+  }
+}
+/** Read only the error code from a rejected response; descriptions can echo input. */
+async function upstreamCode(response: Response): Promise<string | undefined> {
+  try {
+    const text = (await response.text()).slice(0, 65_536);
+    const error = (JSON.parse(text) as { error?: { code?: unknown } }).error;
+    return typeof error?.code === "string" && /^[a-z][a-z0-9_]{0,79}$/.test(error.code)
+      ? error.code
+      : undefined;
+  } catch {
+    return undefined;
   }
 }
 export interface Api {
@@ -80,13 +96,12 @@ export class PublicApi implements Api {
       } catch {
         throw new ApiError(method !== "GET");
       }
-      if (!response.ok) {
-        await response.body?.cancel();
+      if (!response.ok)
         throw new ApiError(
           method !== "GET" && (response.status >= 500 || response.status === 408),
           response.status,
+          await upstreamCode(response),
         );
-      }
       if (response.status === 204) return null;
       const reader = response.body?.getReader();
       const chunks: Uint8Array[] = [];

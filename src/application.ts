@@ -121,7 +121,12 @@ export class Application {
       live_verified: false,
       permissions_verified: false,
       ...(op
-        ? { write: op.write, revision: op.revision, input_schema: inputSchema(op) }
+        ? {
+            write: op.write,
+            revision: op.revision,
+            ...(op.notes ? { notes: op.notes } : {}),
+            input_schema: inputSchema(op),
+          }
         : { reason: "Catalogue metadata only. No reviewed schema, handler or execution policy." }),
       ...(row ? { documentation: row.documentation } : {}),
     };

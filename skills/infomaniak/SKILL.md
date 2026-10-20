@@ -30,6 +30,26 @@ default to the first account, confuse account IDs with hosting IDs, or send
 example identifiers. Scoped policy grants are operator decisions, not an
 automatic ownership audit.
 
+## Infomaniak facts
+
+These hold for the public API (api.infomaniak.com) as observed. Search results
+repeat the relevant ones as `notes` on each reviewed operation.
+
+| Topic              | Fact                                                                                                                                                                                                  |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IDs                | Account ID, product `id`, mail hosting ID and `service_id` are different numbers. For an `email_hosting` product, its `id` is the `mail_hosting_id`.                                                  |
+| Products           | `service_name` is `domain`, `email_hosting`, `hosting` (sometimes `web_hosting`), `cloud` (VPS / Cloud Server, `service_id` 25) and others. `cloud` is not OpenStack Public Cloud.                    |
+| Dates              | `expired_at` is a Unix timestamp in UTC. The Manager shows local time.                                                                                                                                |
+| DNS apex           | The zone apex is source `.` in the API; zone files write `@`.                                                                                                                                         |
+| MX                 | Priority is part of the target (`10 mx.example.com`). There is no priority field.                                                                                                                     |
+| TXT                | Targets can include quotes; compare literally.                                                                                                                                                        |
+| SPF / DMARC / DKIM | SPF is a TXT at the apex starting `v=spf1`; only one is valid. DMARC is a TXT at `_dmarc`. DKIM selectors live under `<selector>._domainkey`; a missing record at a guessed selector is inconclusive. |
+| Mailboxes          | `mailbox_name` is the part before `@`. Mailbox aliases and forwarding are per mailbox; hosting-level redirections are a different feature.                                                            |
+| Forwarding         | `has_dont_deliver=true` keeps no local copy. Disabling forwarding removes every recipient. Flags may arrive as booleans or `"0"`/`"1"`.                                                               |
+| VPS                | The public API lists VPS and reads their firewall rules. There is no public start/stop/reboot API.                                                                                                    |
+| Rate limit         | About 60 requests per minute per token; the plugin queues requests about one per second.                                                                                                              |
+| Errors             | A rejected request reports the HTTP status and Infomaniak's error code (for example `alias_does_not_exist`); descriptions are dropped because they can echo input.                                    |
+
 ## Discover and read
 
 Search for the relevant task. The full public catalogue includes unimplemented
