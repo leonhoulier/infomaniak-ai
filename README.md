@@ -1,12 +1,43 @@
-# Infomaniak AI
+# Infomaniak MCP
 
-An independent, unofficial AI plugin for Infomaniak. Discover services, inspect
-resources, review an exact change, approve it independently, execute and verify.
+Use your AI coding tools with the Infomaniak services you already run.
+Independent, unofficial and open source. Built by [Léon Houlier](https://leonhoulier.com).
+
+**[Try the hosted pilot](https://infomaniak-mcp.com)** ·
+[API reference](https://infomaniak-mcp.com/api) ·
+[Privacy](https://infomaniak-mcp.com/privacy) ·
+[Cookie policy](https://infomaniak-mcp.com/cookies)
+
+```text
+https://infomaniak-mcp.com/mcp
+```
+
+For Claude Code:
+
+```sh
+claude mcp add --transport http infomaniak https://infomaniak-mcp.com/mcp
+```
+
+Then run `/mcp` in Claude Code and complete browser sign-in. For other clients,
+use the [setup guides](https://infomaniak-mcp.com/#setup). Each customer enters
+their own Infomaniak token on a private page and approves one account. Never
+paste a token into chat or a GitHub issue. Native client onboarding is still
+being qualified.
+
+Ask: **“Show my Infomaniak services.”**
+
+| Edition | Available today |
+| --- | --- |
+| Hosted pilot | Account and product inventory; public API catalogue search; four read-only tools |
+| Separate policy edition | Scoped resource reads and reviewed writes, disabled by default and requiring independent human approval |
+
+The hosted pilot cannot change DNS, mail or VPS, read mailbox contents, or deploy
+an application. A catalogue entry is not an executable operation. Provider tokens
+are encrypted at rest; the operator can decrypt them to make API requests.
+
 Not affiliated with or endorsed by Infomaniak.
 
-Version 0.2 has a local MCP server, an optional authenticated HTTP service, a
-human approval interface and a durable operation journal. The complete public
-catalogue is searchable; execution is limited to reviewed handlers.
+## Source coverage
 
 | Coverage                                      | Current state                                                               |
 | --------------------------------------------- | --------------------------------------------------------------------------- |
