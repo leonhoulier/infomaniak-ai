@@ -28,14 +28,18 @@ Ask: **“Show my Infomaniak services.”**
 
 | Edition | Available today |
 | --- | --- |
-| Hosted pilot | Account and product inventory; public API catalogue search; four read-only tools |
+| Hosted pilot | Read-only discovery by default; optional TXT test writes with separate browser approval |
 | Separate policy edition | Scoped resource reads and reviewed writes, disabled by default and requiring independent human approval |
 
-The hosted pilot cannot change DNS, mail or VPS, read mailbox contents, or deploy
-an application. A catalogue entry is not an executable operation. Provider tokens
+The optional hosted write beta can change TXT records only at `_infomaniak-ai-test`
+in one explicitly consented Infomaniak domain. Every exact plan needs independent
+browser approval. Other DNS names, mail, VPS and application deployment remain unavailable. A catalogue entry is not an executable operation. Provider tokens
 are encrypted at rest; the operator can decrypt them to make API requests.
 
 Not affiliated with or endorsed by Infomaniak.
+
+The hosted build is ahead of the public source release. The source below covers
+the policy edition; the current hosted implementation has not been source-published.
 
 ## Source coverage
 
@@ -46,7 +50,7 @@ Not affiliated with or endorsed by Infomaniak.
 | Reviewed operations                           | 12 reads (3 diagnostics), 8 writes; VPS reads need the existing MCP adapter |
 | Writes                                        | Disabled on initialization; scoped grants and independent approval required |
 | Application deployment / VPS lifecycle writes | Not implemented                                                             |
-| Live compatibility                            | Reads checked live; write qualification script ready, not yet run           |
+| Live compatibility                            | Reads checked live; hosted disposable TXT create/update/delete verified; broader writes remain unqualified           |
 
 Catalogue discovery is not proof that an operation is implemented or permitted.
 See [coverage and safety](docs/api-coverage.md), [validation](docs/validation.md)
