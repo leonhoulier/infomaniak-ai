@@ -9,7 +9,7 @@
       "name": "infomaniak",
       "source": "./plugins/infomaniak",
       "description": "Manage Infomaniak DNS, mail settings and VPS apps through the hosted MCP.",
-      "version": "0.3.3"
+      "version": "0.3.4"
     }
   ],
   "description": "Independent Infomaniak workflows and hosted MCP access for AI coding tools."

@@ -644,9 +644,9 @@ for (const resource of ["DNS", "mailbox"])
     },
   );
 
-test("declining the native prompt also vetoes a browser approval made while it was open", async (t) => {
+test("browser approval and concurrent execution cannot bypass an open native confirmation", async (t) => {
   const f = await hostedFixture(t);
-  let p;
+  let p, browserStatus, browserBody, second;
   const c = await connect(f, async () => {
     const response = await f.form("/write-reviews/" + p.id, {
       csrf: f.csrf,
@@ -654,12 +654,40 @@ test("declining the native prompt also vetoes a browser approval made while it w
       ack: "APPROVE",
       decision: "approve",
     });
-    assert.equal(response.status, 303);
+    browserStatus = response.status;
+    browserBody = await response.text();
+    second = await execute(c.client, p);
     return { action: "decline" };
   });
   try {
     p = (await plan(c.client)).plan;
-    assert.equal((await execute(c.client, p)).structuredContent.plan.state, "cancelled");
+    const result = await execute(c.client, p);
+    assert.equal(browserStatus, 400);
+    assert.match(browserBody, /Finish the open confirmation/);
+    assert.equal(code(second), "approval_pending");
+    assert.equal(result.structuredContent.plan.state, "cancelled");
+    assert.equal(writes(f).length, 0);
+  } finally {
+    await c.close();
+  }
+});
+
+test("browser cancellation stays available while a native confirmation is open", async (t) => {
+  const f = await hostedFixture(t);
+  let p;
+  const c = await connect(f, async () => {
+    const response = await f.form("/write-reviews/" + p.id, {
+      csrf: f.csrf,
+      plan_hash: p.hash,
+      decision: "cancel",
+    });
+    assert.equal(response.status, 303);
+    return { action: "accept", content: {} };
+  });
+  try {
+    p = (await plan(c.client)).plan;
+    assert((await execute(c.client, p)).isError);
+    assert.equal(f.store.get("write-plan", p.id).state, "cancelled");
     assert.equal(writes(f).length, 0);
   } finally {
     await c.close();

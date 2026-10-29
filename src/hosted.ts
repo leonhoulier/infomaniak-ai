@@ -618,6 +618,11 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       else {
         if (param(req, "decision") !== "approve" || param(req, "ack") !== "APPROVE")
           throw new PluginError("approval_required", "Review and acknowledge this exact change.");
+        if (nativeApproval?.isPending(plan.id))
+          throw new PluginError(
+            "approval_pending",
+            "Finish the open confirmation in your AI client. To use browser approval instead, cancel this plan and request a new preview.",
+          );
         writes.journal.approve(plan.id, plan.principal, plan.hash);
       }
       browser.csrf = opaque();

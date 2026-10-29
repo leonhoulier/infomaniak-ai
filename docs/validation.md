@@ -1,16 +1,17 @@
 # Validation
 
-## Release 0.3.3
+## Release 0.3.4
 
 The release adds client-native confirmation through MCP form elicitation, with
 browser review for clients without form support and for the JSON API. Neither
 a model argument nor installation consent approves an individual write.
 
-The local regression suite contains 196 tests, including 26 native-confirmation
+The local regression suite contains 197 tests, including 27 native-confirmation
 tests using the standard MCP SDK over real HTTP and synthetic provider data.
 Coverage includes confirmation, refusal, replay, expiry, permission changes,
 cross-connection isolation, cancellation during final ownership reads, batch
-limits and confirmation replies under full tool capacity.
+limits and confirmation replies under full tool capacity. Browser approval is
+refused while a native confirmation is open; browser cancellation remains available.
 
 Validation also covers compilation, formatting, Python checks, dependency audit,
 plugin manifests and package integrity. The deployment process checks the built

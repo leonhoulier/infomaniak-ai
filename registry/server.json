@@ -3,7 +3,7 @@
   "name": "io.github.leonhoulier/infomaniak-mcp",
   "title": "Infomaniak MCP (unofficial)",
   "description": "Manage Infomaniak DNS, mail and VPS apps through OAuth, with live official documentation.",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "repository": {
     "url": "https://github.com/leonhoulier/infomaniak-ai",
     "source": "github"

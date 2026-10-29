@@ -8,6 +8,9 @@ import { writePreview } from "./write-preview.js";
 export class NativeApproval {
   private pending = new Map<string, Plan>();
   constructor(private journal: HostedWriteJournal) {}
+  isPending(id: string): boolean {
+    return this.pending.has(id);
+  }
   async confirm(
     review: () => Plan,
     confirm: NonNullable<ToolInteraction["confirmWrite"]>,
@@ -15,11 +18,11 @@ export class NativeApproval {
     browserUrl: string,
   ): Promise<Plan> {
     const plan = review();
+    if (this.isPending(plan.id))
+      throw new PluginError("approval_pending", "This exact plan already has a confirmation open.");
     if (plan.state === "approved") return plan;
     if (plan.state !== "planned")
       throw new PluginError("invalid_state", "Inspect this plan before another execution request.");
-    if (this.pending.has(plan.id))
-      throw new PluginError("approval_pending", "This exact plan already has a confirmation open.");
     if (
       [...this.pending.values()].some((p) => p.principal === plan.principal) ||
       [...this.pending.values()].filter((p) => p.args.account_id === plan.args.account_id).length >=

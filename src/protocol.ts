@@ -165,7 +165,7 @@ export function createProtocol(
   sessionSignal?: AbortSignal,
 ): Server {
   const server = new Server(
-    { name: "infomaniak-ai", version: "0.3.3" },
+    { name: "infomaniak-ai", version: "0.3.4" },
     {
       capabilities: { tools: {} },
       instructions:
