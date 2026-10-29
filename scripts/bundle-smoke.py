@@ -5,10 +5,11 @@ import json
 from pathlib import Path
 import subprocess
 
-parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument("--bundle",default="artifacts/infomaniak-ai-0.2.0.tgz")
-args=parser.parse_args()
 root=Path(__file__).resolve().parents[1]
+version=json.loads((root/"package.json").read_text())["version"]
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--bundle",default=f"artifacts/infomaniak-ai-{version}.tgz")
+args=parser.parse_args()
 bundle=(root/args.bundle).resolve()
 if not bundle.is_file():raise SystemExit("Build the local bundle first")
 image=next(line.split()[1] for line in (root/"Dockerfile").read_text().splitlines() if line.startswith("FROM "))

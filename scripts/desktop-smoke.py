@@ -7,10 +7,11 @@ import subprocess
 import tempfile
 import zipfile
 
-parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--bundle', default='artifacts/infomaniak-ai-0.2.0.mcpb')
-args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
+version = json.loads((root / 'package.json').read_text())['version']
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--bundle', default=f'artifacts/infomaniak-ai-{version}.mcpb')
+args = parser.parse_args()
 image = next(line.split()[1] for line in (root / 'Dockerfile').read_text().splitlines() if line.startswith('FROM '))
 script = """
 import {readFileSync} from 'node:fs';
