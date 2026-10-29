@@ -1,6 +1,6 @@
 # Directory review test plan
 
-Candidate: 0.3.3. These are reproducible review cases, not a claim that a portal
+Candidate: 0.3.5. These are reproducible review cases, not a claim that a portal
 review or a fresh workflow in every client has passed. Current evidence is at
 [/clients](https://infomaniak-mcp.com/clients).
 
@@ -25,7 +25,7 @@ effect each require their own evidence.
    services this connection can access.” Expect only that account's products,
    no provider credential in tool results and no write tools for this grant.
 2. **DNS change and cleanup.** Reconnect with DNS access to the disposable
-   domain. Ask for one TXT record at `_mcp-review` with value `review-0.3.3`.
+   domain. Ask for one TXT record at `_mcp-review` with value `review-0.3.5`.
    Inspect the complete account, DNS zone, record name and before/after plan.
    For `approval_method: client`, call execute and confirm in the client’s own
    dialog; otherwise approve in the consenting browser before execution. Read back. Update the test value through a

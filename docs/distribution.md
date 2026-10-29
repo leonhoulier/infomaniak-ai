@@ -4,6 +4,14 @@ Release 0.3.5 publishes source, plugin ZIPs and checksums on GitHub, linked from
 [/plugins](https://infomaniak-mcp.com/plugins). Repository installation and public
 downloads remain separate from directory review and approval.
 
+On 29 October 2026, version 0.3.5 was published in the
+[MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.leonhoulier%2Finfomaniak-mcp/versions/0.3.5).
+Public API readback confirmed the entry is active and points to the hosted
+endpoint. This is a metadata listing, not a client compatibility certification.
+The hosted plugin also passed Claude Code's strict directory validator and a
+fresh repository installation at 0.3.5. Client OAuth/write qualification and
+Claude, Cursor and OpenAI portal submissions remain pending.
+
 ## Deliverable
 
 `plugins/infomaniak/` is a thin hosted plugin: portable Agent Plugins manifests,
@@ -41,7 +49,7 @@ a listing in a public directory.
 
 | Surface                  | Prepared input                                                    | Next external step                                                                                                                                       |
 | ------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MCP Registry             | `registry/server.json`; hosted Streamable HTTP, no npm package    | Authenticate as the GitHub publisher, publish this manifest, then verify the exact entry in the Registry API                                             |
+| MCP Registry             | `registry/server.json`; hosted Streamable HTTP, no npm package    | Published and verified active at 0.3.5 on 29 October 2026; update the listing when a new server version is released                                      |
 | Claude                   | Hosted plugin ZIP and repository marketplace                      | Test a clean native plugin install, publish the marketplace files, then submit through the developer directory portal                                    |
 | ChatGPT and Codex        | OpenAI submission ZIP with OAuth/DCR configuration and onboarding | Verify publisher identity, upload with MCP included, verify domain, connect a dedicated review account, resolve scans, submit and publish after approval |
 | Cursor                   | Portable plugin in a public Git repository                        | Test a clean native installation and OAuth flow, then submit the repository for manual marketplace review                                                |
