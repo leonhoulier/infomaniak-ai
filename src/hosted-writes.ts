@@ -455,56 +455,66 @@ export class HostedWrites {
     const provider = this.api(grant.token, active);
     const controlled: Api = {
       request: async (method, path, body, signal) => {
-        active();
-        const dns = /^\/2\/zones\/([^/]+)\/records(?:\/([0-9]+))?$/.exec(path);
-        if (dns) {
-          const zone = decodeURIComponent(dns[1]!);
-          const full = Boolean(
-            grant.scopes?.includes(DNS_SCOPE) && grant.resources?.zones.includes(zone),
-          );
-          if (!full && !(zone === grant.writeZone && grant.scopes?.includes(WRITE_SCOPE)))
-            throw invalid();
-          await verifyWriteZone(provider, grant.account, zone);
+        let forwarded = false;
+        try {
           active();
-          if (signal?.aborted) throw new ApiError(false);
-          const result = await provider.request(method, path, body, signal);
+          const dns = /^\/2\/zones\/([^/]+)\/records(?:\/([0-9]+))?$/.exec(path);
+          if (dns) {
+            const zone = decodeURIComponent(dns[1]!);
+            const full = Boolean(
+              grant.scopes?.includes(DNS_SCOPE) && grant.resources?.zones.includes(zone),
+            );
+            if (!full && !(zone === grant.writeZone && grant.scopes?.includes(WRITE_SCOPE)))
+              throw invalid();
+            await verifyWriteZone(provider, grant.account, zone);
+            active();
+            if (signal?.aborted) throw new ApiError(false);
+            forwarded = true;
+            const result = await provider.request(method, path, body, signal);
+            if (
+              !full &&
+              method === "GET" &&
+              list(result).some((v) => {
+                const r = object(v);
+                return r.source === TEST_NAME && r.type !== "TXT";
+              })
+            )
+              throw new PluginError(
+                "protected_record",
+                "The test name contains a non-TXT record. No write is permitted.",
+              );
+            return result;
+          }
+          const mail =
+            /^\/1\/mail_hostings\/([0-9]+)\/mailboxes\/([^/]+)(?:\/(aliases|forwarding_addresses)(?:\/[^/]+)?)?$/.exec(
+              path,
+            );
+          if (mail) {
+            const mailbox =
+              grant.scopes?.includes(MAIL_SCOPE) &&
+              grant.resources?.mailboxes.find(
+                (m) => m.hosting === Number(mail[1]) && m.name === decodeURIComponent(mail[2]!),
+              );
+            if (!mailbox) throw invalid();
+            await verifyMailbox(provider, grant.account, mailbox);
+            active();
+            if (signal?.aborted) throw new ApiError(false);
+            if (method !== "GET" && !mail[3]) throw invalid();
+            forwarded = true;
+            return provider.request(method, path, body, signal);
+          }
           if (
-            !full &&
             method === "GET" &&
-            list(result).some((v) => {
-              const r = object(v);
-              return r.source === TEST_NAME && r.type !== "TXT";
-            })
+            path ===
+              "/1/products?account_id=" + grant.account + "&service_name=domain&per_page=1000"
           )
-            throw new PluginError(
-              "protected_record",
-              "The test name contains a non-TXT record. No write is permitted.",
-            );
-          return result;
+            return provider.request(method, path, body, signal);
+          throw invalid();
+        } catch (error) {
+          if (method !== "GET" && !forwarded && !(error instanceof ApiError))
+            throw new ApiError(false);
+          throw error;
         }
-        const mail =
-          /^\/1\/mail_hostings\/([0-9]+)\/mailboxes\/([^/]+)(?:\/(aliases|forwarding_addresses)(?:\/[^/]+)?)?$/.exec(
-            path,
-          );
-        if (mail) {
-          const mailbox =
-            grant.scopes?.includes(MAIL_SCOPE) &&
-            grant.resources?.mailboxes.find(
-              (m) => m.hosting === Number(mail[1]) && m.name === decodeURIComponent(mail[2]!),
-            );
-          if (!mailbox) throw invalid();
-          await verifyMailbox(provider, grant.account, mailbox);
-          active();
-          if (signal?.aborted) throw new ApiError(false);
-          if (method !== "GET" && !mail[3]) throw invalid();
-          return provider.request(method, path, body, signal);
-        }
-        if (
-          method === "GET" &&
-          path === "/1/products?account_id=" + grant.account + "&service_name=domain&per_page=1000"
-        )
-          return provider.request(method, path, body, signal);
-        throw invalid();
       },
     };
     return new Engine(this.journal, principal, controlled, [grant.token]);

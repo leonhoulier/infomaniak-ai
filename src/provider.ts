@@ -80,6 +80,7 @@ export class PublicApi implements Api {
     private readonly token: string,
     private readonly queue: RequestQueue,
     private readonly transport: typeof fetch = fetch,
+    private readonly guard?: () => void,
   ) {}
   async request(
     method: "GET" | "POST" | "PUT" | "DELETE",
@@ -94,6 +95,11 @@ export class PublicApi implements Api {
       throw new PluginError("transport_denied", "Unexpected API origin.");
     return this.queue.run(async () => {
       if (signal?.aborted) throw new ApiError(false);
+      try {
+        this.guard?.();
+      } catch {
+        throw new ApiError(false);
+      }
       let response: Response;
       try {
         response = await this.transport(url, {

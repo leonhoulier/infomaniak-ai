@@ -21,7 +21,7 @@ import {
   type Browser,
   type Grant,
 } from "./hosted-oauth.js";
-import { PublicApi, RequestQueue, list, object, type Api } from "./provider.js";
+import { ApiError, PublicApi, RequestQueue, list, object, type Api } from "./provider.js";
 import { createReadOnlyFetch } from "./policy.js";
 import { Discovery } from "./discovery.js";
 import { createProtocol } from "./protocol.js";
@@ -142,14 +142,15 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
         options.api
           ? {
               request: (method, path, body, signal) => {
-                guard();
+                try {
+                  guard();
+                } catch {
+                  throw new ApiError(false);
+                }
                 return options.api!(token).request(method, path, body, signal);
               },
             }
-          : new PublicApi(token, queue, (input, init) => {
-              guard();
-              return fetch(input, init);
-            }),
+          : new PublicApi(token, queue, fetch, guard),
       )
     : undefined;
   const deployments =
@@ -166,6 +167,18 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
   };
   const active = new Map<string, number>(),
     attempts = new Map<string, { count: number; until: number }>();
+  const atCapacity = (id: string) =>
+    (active.get(id) ?? 0) >= 4 || [...active.values()].reduce((a, b) => a + b, 0) >= 32;
+  function reserveWork(id: string): () => void {
+    if (atCapacity(id))
+      throw new PluginError("rate_limited", "Please try again after the running tools finish.");
+    active.set(id, (active.get(id) ?? 0) + 1);
+    return () => {
+      const n = (active.get(id) ?? 1) - 1;
+      if (n) active.set(id, n);
+      else active.delete(id);
+    };
+  }
   app.disable("x-powered-by");
   // Set only for a deployment whose sole ingress proxy overwrites forwarding headers.
   app.set("trust proxy", options.trustProxyHops ?? 0);
@@ -650,11 +663,11 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       res.status(403).json({ error: "unexpected_origin" });
       return;
     }
-    if ((active.get(id) ?? 0) >= 4 || [...active.values()].reduce((a, b) => a + b, 0) >= 32) {
+    if (atCapacity(id)) {
       res.status(429).json({ error: "too_many_requests" });
       return;
     }
-    active.set(id, (active.get(id) ?? 0) + 1);
+    const release = reserveWork(id);
     try {
       const permitted = canWrite(grant);
       const principal = writes?.hasAccess(grant)
@@ -731,9 +744,7 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
         "/write-reviews",
       );
     } finally {
-      const n = (active.get(id) ?? 1) - 1;
-      if (n) active.set(id, n);
-      else active.delete(id);
+      release();
     }
   });
   app.use(
@@ -937,6 +948,7 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       !(canWrite(initialGrant) || Boolean(initialGrant.scopes?.includes(DEPLOY_SCOPE))),
       undefined,
       sessionSignal,
+      () => reserveWork(id),
     );
   }
   const handleMcp = async (req: Request, res: Response) => {
@@ -954,33 +966,21 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
     const work = (Array.isArray(req.body) ? req.body : [req.body]).some(
       (message) => message?.method === "tools/call",
     );
-    if (
-      work &&
-      ((active.get(id) ?? 0) >= 4 || [...active.values()].reduce((a, b) => a + b, 0) >= 32)
-    ) {
+    if (work && atCapacity(id)) {
       res.status(429).send("Please try again shortly.");
       return;
     }
-    if (work) active.set(id, (active.get(id) ?? 0) + 1);
-    try {
-      const permissions = fingerprint(
-        JSON.stringify({
-          account: grant.account,
-          scopes: grant.scopes,
-          resources: grant.resources,
-          writeZone: grant.writeZone,
-        }),
-      );
-      await mcp.handle(req, res, id, permissions, grant.account, (signal) =>
-        connectionProtocol(id, grant, signal),
-      );
-    } finally {
-      if (work) {
-        const n = (active.get(id) ?? 1) - 1;
-        if (n) active.set(id, n);
-        else active.delete(id);
-      }
-    }
+    const permissions = fingerprint(
+      JSON.stringify({
+        account: grant.account,
+        scopes: grant.scopes,
+        resources: grant.resources,
+        writeZone: grant.writeZone,
+      }),
+    );
+    await mcp.handle(req, res, id, permissions, grant.account, (signal) =>
+      connectionProtocol(id, grant, signal),
+    );
   };
   app.post("/mcp", handleMcp);
   app.delete("/mcp", handleMcp);

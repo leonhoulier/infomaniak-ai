@@ -4,6 +4,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { ElicitRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { hostedFixture } from "./fixtures/hosted.mjs";
+import { PluginError } from "../dist/errors.js";
 
 async function connect(
   f,
@@ -689,6 +690,231 @@ test("browser cancellation stays available while a native confirmation is open",
     assert((await execute(c.client, p)).isError);
     assert.equal(f.store.get("write-plan", p.id).state, "cancelled");
     assert.equal(writes(f).length, 0);
+  } finally {
+    await c.close();
+  }
+});
+
+test("each tool in a batch must reserve its own work slot", { timeout: 15000 }, async (t) => {
+  const f = await hostedFixture(t);
+  let ready,
+    release,
+    reads = 0;
+  const full = new Promise((r) => (ready = r)),
+    gate = new Promise((r) => (release = r)),
+    original = f.api.request.bind(f.api);
+  f.api.request = async (method, path, ...args) => {
+    if (method === "GET" && path.includes("/records")) {
+      if (++reads === 4) ready();
+      await gate;
+    }
+    return original(method, path, ...args);
+  };
+  const running = f
+    .request("/mcp", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer " + f.access,
+        "content-type": "application/json",
+        accept: "application/json, text/event-stream",
+      },
+      body: JSON.stringify(
+        Array.from({ length: 8 }, (_, id) => ({
+          jsonrpc: "2.0",
+          id,
+          method: "tools/call",
+          params: {
+            name: "infomaniak_read",
+            arguments: {
+              operation: "dns.records.list",
+              arguments: { account_id: 10, zone: "example.com" },
+            },
+          },
+        })),
+      ),
+    })
+    .then((r) => r.json());
+  try {
+    await full;
+    await f.request("/healthz");
+    assert.equal(reads, 4);
+    release();
+    const results = await running;
+    assert.equal(results.length, 8);
+    const denied = results.filter((r) => r.result.isError);
+    assert.equal(denied.length, 4);
+    assert(denied.every((r) => code(r.result) === "rate_limited"));
+  } finally {
+    release();
+    await running;
+  }
+});
+
+for (const groups of [1, 8])
+  test(
+    `aborted sessions retain ${groups === 1 ? "per-grant" : "global"} capacity until tool work finishes`,
+    { timeout: 15000 },
+    async (t) => {
+      const f = await hostedFixture(t),
+        total = groups * 4;
+      let ready,
+        release,
+        closed,
+        overflow,
+        reads = 0,
+        closedCount = 0;
+      const started = new Promise((r) => (ready = r)),
+        gate = new Promise((r) => (release = r)),
+        allClosed = new Promise((r) => (closed = r)),
+        exceeded = new Promise((r) => (overflow = r)),
+        original = f.api.request.bind(f.api);
+      f.api.request = async (method, path, ...args) => {
+        if (method === "GET" && path.includes("/records")) {
+          if (++reads === total) ready();
+          if (reads > total) overflow("extra provider read started");
+          await gate;
+        }
+        return original(method, path, ...args);
+      };
+      f.runtime.server.on("request", (req, res) => {
+        if (req.headers["x-fixture-disconnect"] === "yes")
+          res.once("close", () => {
+            if (++closedCount === total) closed();
+          });
+      });
+      const clients = [],
+        controllers = [],
+        requests = [];
+      let fresh, extra;
+      const post = (client, access, id, controller) =>
+        f
+          .request("/mcp", {
+            method: "POST",
+            signal: controller?.signal,
+            headers: {
+              authorization: "Bearer " + access,
+              "content-type": "application/json",
+              accept: "application/json, text/event-stream",
+              "mcp-session-id": client.transport.sessionId,
+              ...(controller ? { "x-fixture-disconnect": "yes" } : {}),
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id,
+              method: "tools/call",
+              params: {
+                name: "infomaniak_read",
+                arguments: {
+                  operation: "dns.records.list",
+                  arguments: { account_id: 10, zone: "example.com" },
+                },
+              },
+            }),
+          })
+          .then(async (r) => ({ status: r.status, body: await r.text() }));
+      try {
+        for (let group = 0; group < groups; group++) {
+          const access = group ? await otherGrant(f) : f.access;
+          const c = await connect(f, undefined, { elicitation: { form: {} } }, access);
+          clients.push(c);
+          for (let i = 0; i < 4; i++) {
+            const controller = new AbortController();
+            controllers.push(controller);
+            requests.push(post(c, access, 100 + group * 4 + i, controller));
+          }
+        }
+        await started;
+        controllers.forEach((c) => c.abort());
+        await Promise.allSettled(requests);
+        await allClosed;
+        const access = groups === 1 ? f.access : await otherGrant(f);
+        fresh = await connect(f, undefined, { elicitation: { form: {} } }, access);
+        extra = post(fresh, access, 900);
+        assert.equal(await Promise.race([extra.then((r) => r.status), exceeded]), 429);
+        assert.equal(reads, total);
+        release();
+        await new Promise(setImmediate);
+        assert(!(await tool(fresh.client, "infomaniak_status", {})).isError);
+        assert.equal(writes(f).length, 0);
+      } finally {
+        release();
+        controllers.forEach((c) => c.abort());
+        await Promise.allSettled([...requests, extra]);
+        await Promise.all(clients.map((c) => c.close()));
+        await fresh?.close();
+        await new Promise(setImmediate);
+      }
+    },
+  );
+
+for (const change of ["domain", "mailbox", "grant"])
+  test(`a closed ${change} failure during final ownership verification releases the unsent write lock`, async (t) => {
+    const f = await hostedFixture(t);
+    let checks = 0;
+    const original = f.api.request.bind(f.api);
+    const c = await connect(f, async () => {
+      f.api.request = async (method, path, ...args) => {
+        const ownershipRead =
+          change === "mailbox"
+            ? path === "/1/mail_hostings/30/mailboxes/hello"
+            : path.includes("service_name=domain");
+        if (method === "GET" && ownershipRead && ++checks === 2) {
+          if (change === "domain") return [];
+          if (change === "mailbox")
+            return { mailbox_name: "renamed", mailbox: "renamed@example.com" };
+          f.store.put(
+            "grant",
+            f.id,
+            { ...f.grant, resources: { ...f.grant.resources, zones: [] } },
+            f.grant.expires,
+          );
+        }
+        return original(method, path, ...args);
+      };
+      return { action: "accept", content: {} };
+    });
+    try {
+      const p =
+        change === "mailbox"
+          ? (
+              await tool(c.client, "infomaniak_plan", {
+                operation: "mail.alias.add",
+                arguments: {
+                  account_id: 10,
+                  mail_hosting_id: 30,
+                  mailbox_name: "hello",
+                  alias: "native-test",
+                },
+              })
+            ).structuredContent.plan
+          : (await plan(c.client)).plan;
+      const result = await execute(c.client, p);
+      assert.equal(result.structuredContent.plan.state, "failed");
+      assert.equal(writes(f).length, 0);
+      assert.equal(f.store.list("write-lock").length, 0);
+    } finally {
+      await c.close();
+    }
+  });
+
+test("a provider error after mutation dispatch stays unknown and locked until readback", async (t) => {
+  const f = await hostedFixture(t),
+    original = f.api.request.bind(f.api);
+  const c = await connect(f, async () => ({ action: "accept", content: {} }));
+  f.api.request = async (method, path, ...args) => {
+    const result = await original(method, path, ...args);
+    if (method !== "GET")
+      throw new PluginError("incomplete_response", "Synthetic incomplete mutation response");
+    return result;
+  };
+  try {
+    const p = (await plan(c.client)).plan;
+    assert.equal((await execute(c.client, p)).structuredContent.plan.state, "unknown");
+    assert.equal(f.store.list("write-lock").length, 1);
+    assert.equal(writes(f).length, 1);
+    const result = await tool(c.client, "infomaniak_operation", { plan_id: p.id, refresh: true });
+    assert.equal(result.structuredContent.plan.state, "verified");
+    assert.equal(writes(f).length, 1);
   } finally {
     await c.close();
   }

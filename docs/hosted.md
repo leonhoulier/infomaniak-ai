@@ -143,11 +143,16 @@ docker compose -f deploy/hosted.compose.yaml up -d --build
 
 Caddy terminates HTTPS and preserves the original Host. Do not expose the gateway
 port directly, log request bodies/query credentials, or enable broad proxy-header
-trust. The app does not trust arbitrary forwarded headers. Standard OAuth rate
-limits may be shared across users behind the proxy; capacity/proxy policy needs
-qualification before a wider launch. The pilot caps registrations at 2,000 and
+trust. The app does not trust arbitrary forwarded headers. Configure trusted
+proxy hops for the actual ingress topology so per-client OAuth limits use the
+verified client address. The pilot caps registrations at 2,000 and
 pending authorizations at 1,000, with bounded bodies, token attempts and MCP
 concurrency. This is not a multi-region or horizontally scaled service.
+
+Work is limited to four active tool calls or JSON API requests per OAuth
+connection and 32 across the service. Each tool in a JSON-RPC batch reserves its
+own slot. Disconnecting does not release capacity until the handler finishes.
+MCP confirmation and control responses remain deliverable while tool slots are full.
 
 When the host already runs Nginx on ports 80/443, use
 `deploy/hosted.nginx.compose.yaml` instead. It extends the gateway configuration,

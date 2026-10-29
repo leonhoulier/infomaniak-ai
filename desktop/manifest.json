@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "infomaniak-ai",
   "display_name": "Infomaniak",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Connect your Infomaniak accounts and discover your services. Start read-only, with your token in the app's private settings.",
   "long_description": "An independent, unofficial connection for Infomaniak. Enter your API token in the extension settings, then ask: Show my Infomaniak services. If you have several accounts, you choose which one to inspect. This desktop edition starts with read-only account and product discovery. No server hosting is required. Your token is used locally to call Infomaniak; returned service information is shared with your AI client. It is not affiliated with or endorsed by Infomaniak.",
   "author": {

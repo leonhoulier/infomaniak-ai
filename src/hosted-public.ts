@@ -30,7 +30,7 @@ export function capabilities(origin: URL, writesEnabled = false, resourceWrites 
   if (writesEnabled && resourceWrites)
     return {
       name: "Infomaniak MCP",
-      version: "0.3.4",
+      version: "0.3.5",
       documentation_access: DOCUMENTATION_STATUS,
       unofficial: true,
       mode: "hosted-resources",

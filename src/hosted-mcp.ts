@@ -31,6 +31,7 @@ export class HostedMcp {
   private drop(id: string): void {
     const entry = this.sessions.get(id);
     this.sessions.delete(id);
+    entry?.abort.abort();
     void entry?.protocol.close().catch(() => undefined);
   }
   private retire(id: string, entry: Session): void {

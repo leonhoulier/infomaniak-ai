@@ -1,6 +1,6 @@
 # Plugin distribution and discovery
 
-Release 0.3.4 publishes source, plugin ZIPs and checksums on GitHub, linked from
+Release 0.3.5 publishes source, plugin ZIPs and checksums on GitHub, linked from
 [/plugins](https://infomaniak-mcp.com/plugins). Repository installation and public
 downloads remain separate from directory review and approval.
 
@@ -18,8 +18,8 @@ Build the submission ZIP with:
 node scripts/package-plugin.mjs
 ```
 
-The two archives in `artifacts/` are `infomaniak-plugin-portable-0.3.4.zip` and
-`infomaniak-plugin-openai-0.3.4.zip`. The portable one targets compatible plugin
+The two archives in `artifacts/` are `infomaniak-plugin-portable-0.3.5.zip` and
+`infomaniak-plugin-openai-0.3.5.zip`. The portable one targets compatible plugin
 hosts; the OpenAI variant adds the documented OAuth/DCR submission declaration.
 OpenAI documents an MCP-entry vendor extension that the current strict portable
 MCP schema rejects. Keep that addition confined to the OpenAI variant; validate
@@ -117,7 +117,7 @@ users more useful information than a list of unsupported API endpoints.
 - [MCP Registry remote-server metadata](https://modelcontextprotocol.io/registry/remote-servers)
 - [MCP Registry publishing](https://modelcontextprotocol.io/registry/quickstart)
 
-## Native confirmation, 0.3.4
+## Native confirmation, 0.3.5
 
 Hosted MCP connections negotiating form elicitation can confirm exact writes in
 their client's own dialog. Account/resource consent and credential entry still

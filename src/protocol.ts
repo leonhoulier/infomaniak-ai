@@ -163,9 +163,10 @@ export function createProtocol(
   discovery = false,
   docs = documentation,
   sessionSignal?: AbortSignal,
+  reserveTool?: () => () => void,
 ): Server {
   const server = new Server(
-    { name: "infomaniak-ai", version: "0.3.4" },
+    { name: "infomaniak-ai", version: "0.3.5" },
     {
       capabilities: { tools: {} },
       instructions:
@@ -179,8 +180,11 @@ export function createProtocol(
     ],
   }));
   server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
+    let release: (() => void) | undefined;
     try {
+      release = reserveTool?.();
       const signal = sessionSignal ? AbortSignal.any([extra.signal, sessionSignal]) : extra.signal;
+      if (signal.aborted) throw new PluginError("request_cancelled", "This request ended.");
       const elicitation = server.getClientCapabilities()?.elicitation;
       const form = elicitation && ("form" in elicitation || !Object.keys(elicitation).length);
       const interaction: ToolInteraction = {
@@ -209,12 +213,7 @@ export function createProtocol(
       };
       const data =
         (await docs.dispatch(request.params.name, request.params.arguments ?? {}, signal)) ??
-        (await dispatch(
-          request.params.name,
-          request.params.arguments ?? {},
-          extra.signal,
-          interaction,
-        ));
+        (await dispatch(request.params.name, request.params.arguments ?? {}, signal, interaction));
       if (request.params.name === "infomaniak_status") data.documentation = DOCUMENTATION_STATUS;
       return {
         content: [{ type: "text" as const, text: JSON.stringify(data) }],
@@ -237,6 +236,8 @@ export function createProtocol(
         isError: true,
         content: [{ type: "text" as const, text: JSON.stringify({ error: true, code, message }) }],
       };
+    } finally {
+      release?.();
     }
   });
   return server;

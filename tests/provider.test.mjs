@@ -2,6 +2,39 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { PublicApi, RequestQueue } from "../dist/provider.js";
 
+test("authorization lost while queued rejects an unsent mutation without transport uncertainty", async () => {
+  let entered,
+    release,
+    allowed = true;
+  const started = new Promise((r) => (entered = r)),
+    gate = new Promise((r) => (release = r)),
+    calls = [];
+  const api = new PublicApi(
+    "fixture-token",
+    new RequestQueue(0),
+    async (_url, options) => {
+      calls.push(options.method);
+      if (options.method === "GET") {
+        entered();
+        await gate;
+      }
+      return Response.json({ result: "success", data: [] });
+    },
+    () => {
+      if (!allowed) throw new Error("Synthetic revoked grant");
+    },
+  );
+  const reading = api.request("GET", "/1/accounts");
+  await started;
+  const writing = api.request("POST", "/2/zones/example.com/records", { target: "fixture" });
+  const rejected = assert.rejects(writing, (error) => error.uncertain === false);
+  allowed = false;
+  release();
+  await reading;
+  await rejected;
+  assert.deepEqual(calls, ["GET"]);
+});
+
 test("typed public transport sends fixed origin/auth with redirect rejection and no browser credentials", async () => {
   const calls = [];
   const api = new PublicApi("fixture-token", new RequestQueue(0), async (url, options) => {
