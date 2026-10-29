@@ -2,6 +2,7 @@
 """Run the desktop bundle offline in a clean Node container with a fake token."""
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -48,7 +49,7 @@ with tempfile.TemporaryDirectory(prefix='infomaniak-desktop-check-') as director
                 raise SystemExit('Unexpected archive member')
         archive.extractall(destination)
     command = ['docker', 'run', '--rm', '--network', 'none', '--read-only', '--cap-drop', 'ALL',
-               '--security-opt', 'no-new-privileges:true', '--user', 'node',
+               '--security-opt', 'no-new-privileges:true', '--user', str(os.getuid()) + ':' + str(os.getgid()),
                '--mount', 'type=bind,src=' + str(destination) + ',dst=/extension,readonly',
                image, 'node', '--input-type=module', '-e', script]
     result = subprocess.run(command, capture_output=True, text=True, timeout=60)

@@ -1,4 +1,4 @@
-import { mkdtemp, cp, readFile, writeFile, mkdir, readdir, rm, access } from "node:fs/promises";
+import { mkdtemp, cp, readFile, writeFile, mkdir, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -23,11 +23,10 @@ try {
   await writeFile(join(stage, "manifest.json"), JSON.stringify(manifest, null, 2));
   const install = spawnSync(
     "npm",
-    ["ci", "--prefix", stage, "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund"],
+    ["ci", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund"],
     { cwd: stage, encoding: "utf8", shell: false },
   );
   if (install.status !== 0) throw new Error("Could not prepare the desktop runtime dependencies");
-  await access(join(stage, "node_modules/@modelcontextprotocol/sdk/dist/esm/server/index.js"));
   const files = {};
   let total = 0;
   async function collect(folder, prefix = "") {
