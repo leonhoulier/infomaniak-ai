@@ -7,6 +7,8 @@ export const PUBLIC_PATHS = [
   "/api",
   "/privacy",
   "/cookies",
+  "/support",
+  "/terms",
   "/clients/claude",
   "/clients/chatgpt",
   "/clients/grok",
@@ -30,7 +32,7 @@ export function capabilities(origin: URL, writesEnabled = false, resourceWrites 
   if (writesEnabled && resourceWrites)
     return {
       name: "Infomaniak MCP",
-      version: "0.3.5",
+      version: "0.3.6",
       documentation_access: DOCUMENTATION_STATUS,
       unofficial: true,
       mode: "hosted-resources",
@@ -148,6 +150,18 @@ export function publicPage(
             : ""),
       previewNotice,
       { origin: origin.origin, path, description, copy },
+    );
+  if (path === "/support")
+    return render(
+      "Support",
+      "Setup help, issue reporting and privacy support for the independent Infomaniak MCP service.",
+      `<h1>Help with Infomaniak MCP.</h1><p class="lead">Start with the <a href="/">connection guides</a> and <a href="/clients">tested client workflows</a>. Directory availability and compatibility vary by client.</p><div class="policy"><h2>Report a problem</h2><p><a href="${SOURCE}/issues">Open a GitHub issue</a> for a reproducible problem or feature request. Include your AI client and version, the plugin version, the operation and a redacted error. Keep API tokens, OAuth credentials, customer data, full DNS zones and private runner logs out of public issues.</p><h2>Security and privacy</h2><p><a href="${SOURCE}/security/advisories/new">Report a vulnerability privately on GitHub</a>. For a privacy request or a connection you cannot remove, email <a href="mailto:leon@houlier.com">leon@houlier.com</a>. Do not send a token or password.</p><h2>Disconnect an account</h2><p>Open <a href="/connections">Manage connection</a> in the browser that connected your account. If that browser is unavailable, revoke the provider token in Infomaniak Manager. Revocation stops new work; an already-issued request may still finish. See the <a href="/privacy">privacy policy</a> for retention and backup details.</p><h2>Contribute</h2><p>This is an independent, MIT-licensed open-source project by Léon Houlier. <a href="${SOURCE}/blob/main/CONTRIBUTING.md">Contributions are welcome</a>.</p></div>`,
+    );
+  if (path === "/terms")
+    return render(
+      "Terms of service",
+      "Terms for using the independent, open-source Infomaniak MCP hosted service.",
+      `<h1>Using Infomaniak MCP.</h1><p class="muted">Updated 30 October 2026</p><div class="policy"><p class="lead">Infomaniak MCP is an independent, open-source service operated by Léon Houlier. It is not affiliated with or endorsed by Infomaniak or the AI clients it connects to. The source is available under the <a href="${SOURCE}/blob/main/LICENSE">MIT licence</a>.</p><h2>Your account and permissions</h2><p>Use accounts and resources you are authorised to manage. Supply your own Infomaniak token through the private connection page, choose an account and select the allowed resources. Infomaniak and your AI client have their own terms for their services.</p><h2>Review changes before confirming</h2><p>Review the account, target and exact change before confirming a write in your client's dialog or the browser fallback. DNS, mailbox and app changes may affect services you run. Keep your own backups and recovery arrangements. An optional VPS runner runs on infrastructure you own and manages only the app definitions you pair.</p><h2>Scope and availability</h2><p>The hosted service is a public pilot without a service-level commitment. Features, compatibility and availability may change. Supported operations and limits are listed in the <a href="/api">API documentation</a>. Catalogue entries and help guides do not mean an operation can be executed by this service.</p><p>This service does not sell Infomaniak products, purchase capacity, read mailbox content or provide general shell access. You remain responsible for charges from your Infomaniak resources, AI client and any infrastructure you choose to run.</p><h2>Shared service</h2><p>Do not access resources without permission, bypass consent or confirmation, or intentionally disrupt other users. Access may be restricted to protect the shared service or respond to abuse.</p><h2>Privacy and disconnecting</h2><p>Provider tokens and operational state are handled as described in the <a href="/privacy">privacy policy</a>. Disconnecting invalidates the connection and deletes its live provider token. An already-issued operation may complete; uncertain operations retain evidence for investigation. The <a href="/cookies">cookie policy</a> explains essential browser cookies.</p><p>For help, security reporting or privacy requests, use <a href="/support">Support</a> or email <a href="mailto:leon@houlier.com">leon@houlier.com</a>. Do not send credentials through chat, public issues or email.</p></div>`,
     );
   if (path === "/api" && resourceWrites && writesEnabled)
     return render(

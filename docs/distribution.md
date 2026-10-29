@@ -1,6 +1,6 @@
 # Plugin distribution and discovery
 
-Release 0.3.5 publishes source, plugin ZIPs and checksums on GitHub, linked from
+Release 0.3.6 adds support and terms pages and corrects the OpenAI listing metadata. Source, plugin ZIPs and checksums are published on GitHub, linked from
 [/plugins](https://infomaniak-mcp.com/plugins). Repository installation and public
 downloads remain separate from directory review and approval.
 
@@ -9,8 +9,7 @@ On 29 October 2026, version 0.3.5 was published in the
 Public API readback confirmed the entry is active and points to the hosted
 endpoint. This is a metadata listing, not a client compatibility certification.
 The hosted plugin also passed Claude Code's strict directory validator and a
-fresh repository installation at 0.3.5. Client OAuth/write qualification and
-Claude, Cursor and OpenAI portal submissions remain pending.
+fresh repository installation at 0.3.5. Claude is submitted with its security scan passed and human review pending. Cursor has received the publisher application. OpenAI has an uploaded draft, a verified domain and an authorised read-only scanner connection. Review materials, positive client/write qualification and final OpenAI submission remain pending.
 
 ## Deliverable
 
@@ -26,8 +25,8 @@ Build the submission ZIP with:
 node scripts/package-plugin.mjs
 ```
 
-The two archives in `artifacts/` are `infomaniak-plugin-portable-0.3.5.zip` and
-`infomaniak-plugin-openai-0.3.5.zip`. The portable one targets compatible plugin
+The two archives in `artifacts/` are `infomaniak-plugin-portable-0.3.6.zip` and
+`infomaniak-plugin-openai-0.3.6.zip`. The portable one targets compatible plugin
 hosts; the OpenAI variant adds the documented OAuth/DCR submission declaration.
 OpenAI documents an MCP-entry vendor extension that the current strict portable
 MCP schema rejects. Keep that addition confined to the OpenAI variant; validate

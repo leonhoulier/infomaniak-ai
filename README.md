@@ -81,7 +81,7 @@ claude plugin install infomaniak@infomaniak-mcp
 
 Version 0.3.5 is [published in the MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.leonhoulier%2Finfomaniak-mcp/versions/0.3.5).
 The entry points to the hosted OAuth endpoint; customers do not need an npm
-package. Claude, Cursor and OpenAI directory submissions are still pending.
+package. Claude is submitted for review, Cursor has received the publisher application, and OpenAI has an uploaded draft. These are not approved directory listings.
 Repository installation and public downloads are available separately. See the
 [distribution plan](docs/distribution.md) for current submission routes, native
 qualification, review materials and discovery priorities.

@@ -1,6 +1,6 @@
 {
   "name": "infomaniak",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Manage Infomaniak DNS, mail settings and VPS apps, with current official documentation. Independent and unofficial.",
   "author": {
     "name": "L\u00e9on Houlier",

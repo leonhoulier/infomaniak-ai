@@ -166,7 +166,7 @@ export function createProtocol(
   reserveTool?: () => () => void,
 ): Server {
   const server = new Server(
-    { name: "infomaniak-ai", version: "0.3.5" },
+    { name: "infomaniak-ai", version: "0.3.6" },
     {
       capabilities: { tools: {} },
       instructions:

@@ -1,6 +1,6 @@
 {
   "name": "infomaniak-ai",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Inspect Infomaniak infrastructure; optionally use scoped API operations and independently approved writes.",
   "license": "MIT",
   "author": {

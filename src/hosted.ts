@@ -267,7 +267,7 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
     }
     res.type("html").send(html);
   });
-  for (const path of ["/api", "/privacy", "/cookies"])
+  for (const path of ["/api", "/privacy", "/cookies", "/support", "/terms"])
     app.get(path, (_req, res) => {
       res
         .type("html")

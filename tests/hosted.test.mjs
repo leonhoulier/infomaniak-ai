@@ -813,6 +813,8 @@ test("public reference pages expose no customer data, set no cookies and keep pr
     "/api",
     "/privacy",
     "/cookies",
+    "/support",
+    "/terms",
     "/clients/claude",
     "/clients/chatgpt",
     "/clients/grok",

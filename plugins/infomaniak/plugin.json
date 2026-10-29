@@ -1,10 +1,10 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "infomaniak",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Manage Infomaniak DNS, mail settings and VPS apps. Find current official guides for Manager tasks. Independent and unofficial.",
   "author": {
-    "name": "L\u00e9on Houlier",
+    "name": "Léon Houlier",
     "url": "https://leonhoulier.com"
   },
   "homepage": "https://infomaniak-mcp.com",
@@ -15,10 +15,10 @@
     "com.openai": {
       "onboardingSkill": "./skills/connect/SKILL.md",
       "interface": {
-        "displayName": "Infomaniak MCP",
-        "shortDescription": "Manage Infomaniak from your AI tools",
-        "longDescription": "Connect your own Infomaniak account through private browser consent. Inspect services, manage consented DNS and mailbox settings, deploy pinned commits through your own VPS runner, and retrieve current official documentation. Each supported write has an exact preview and independent browser review. This service is independent and unofficial.",
-        "developerName": "L\u00e9on Houlier",
+        "displayName": "Infomaniak Tools",
+        "shortDescription": "DNS, mail and VPS from chat",
+        "longDescription": "Connect your own Infomaniak account through private browser consent. Inspect services, manage consented DNS and mailbox settings, deploy pinned commits through your own VPS runner, and retrieve current official documentation. Each supported write has an exact preview and confirmation in your client, with browser review as the fallback. This open-source service is independent and unofficial. Client compatibility and tested workflows are listed on our website.",
+        "developerName": "Léon Houlier",
         "category": "Developer Tools",
         "capabilities": ["Read", "Write"],
         "websiteURL": "https://infomaniak-mcp.com",
@@ -29,7 +29,9 @@
           "Find the current official Infomaniak guide for my Manager task."
         ],
         "composerIcon": "./assets/icon.png",
-        "logo": "./assets/icon.png"
+        "logo": "./assets/icon.png",
+        "supportURL": "https://infomaniak-mcp.com/support",
+        "termsOfServiceURL": "https://infomaniak-mcp.com/terms"
       }
     }
   }
