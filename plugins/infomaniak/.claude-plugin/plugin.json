@@ -1,0 +1,15 @@
+{
+  "name": "infomaniak",
+  "version": "0.3.3",
+  "description": "Manage Infomaniak DNS, mail settings and VPS apps, with current official documentation. Independent and unofficial.",
+  "author": {
+    "name": "L\u00e9on Houlier",
+    "url": "https://leonhoulier.com"
+  },
+  "homepage": "https://infomaniak-mcp.com",
+  "repository": "https://github.com/leonhoulier/infomaniak-ai",
+  "license": "MIT",
+  "keywords": ["infomaniak", "mcp", "dns", "mail", "vps", "deployment", "documentation"],
+  "privacyPolicyUrl": "https://infomaniak-mcp.com/privacy",
+  "icon": "./assets/icon.png"
+}

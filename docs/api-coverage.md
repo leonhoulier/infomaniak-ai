@@ -1,7 +1,7 @@
 # API coverage and write policy
 
 This defines broad API support and the operation admission policy. Version 0.2
-implements full catalogue discovery and 17 reviewed handlers: nine reads and
+implements full catalogue discovery and 20 reviewed handlers: twelve reads and
 eight independently approved writes. Writes are disabled by default. The original
 three-tool read-only mode remains available. Nothing in this document alone
 enables a route.

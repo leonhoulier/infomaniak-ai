@@ -1,6 +1,6 @@
 {
   "name": "infomaniak-ai",
-  "version": "0.2.0",
+  "version": "0.3.3",
   "private": true,
   "description": "An unofficial Infomaniak AI plugin with API discovery, scoped reads and independently approved writes.",
   "license": "MIT",
@@ -22,18 +22,27 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test --test-concurrency=2 tests/*.test.mjs",
     "doctor": "node dist/server.js --doctor",
+    "preview": "npm run build && node scripts/preview-hosted.mjs",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "package": "npm run build && node scripts/package.mjs",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "package:desktop": "npm run build && node scripts/package-desktop.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
-    "zod": "3.25.76",
-    "zod-to-json-schema": "3.25.2"
+    "express": "5.3.0",
+    "jsonc-parser": "3.3.1",
+    "parse5": "8.0.1",
+    "posthog-node": "5.57.2",
+    "zod": "4.6.7"
   },
   "devDependencies": {
+    "@types/express": "5.0.6",
     "@types/node": "22.19.19",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "fflate": "0.8.3",
     "prettier": "3.8.3",
     "typescript": "5.9.3"
   },
@@ -41,9 +50,16 @@
     "dist",
     "data",
     "skills",
-    ".claude-plugin",
+    ".claude-plugin/plugin.json",
     "README.md",
     "LICENSE",
-    "docs"
+    "docs/hosting.md",
+    "docs/hosted.md",
+    "docs/onboarding.md",
+    "docs/product.md",
+    "docs/resource-workflows.md",
+    "docs/testing.md",
+    "docs/write-api.md",
+    "docs/documentation.md"
   ]
 }

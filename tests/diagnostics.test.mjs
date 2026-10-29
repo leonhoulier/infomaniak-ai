@@ -7,6 +7,24 @@ const zone = { account_id: 10, zone: "example.com" };
 const codes = (findings) => findings.map((f) => f.code).sort();
 const rec = (type, source, target, ttl = 3600) => ({ type, source, target, ttl });
 
+test("CAA propagation compares DNS presentation values with Node's structured answers", async (t) => {
+  const f = await fixture(t);
+  f.api.records = [
+    { id: 1, ...rec("CAA", ".", "0   ISSUE letsencrypt.org") },
+    { id: 2, ...rec("CAA", ".", '128 issuewild ";"') },
+    { id: 3, ...rec("CAA", ".", '0 iodef "mailto:pki@example.com"') },
+  ];
+  t.mock.method(lookup, "query", async () => [
+    { critical: 0, iodef: "mailto:pki@example.com" },
+    { critical: 128, issuewild: ";" },
+    { critical: 0, issue: "letsencrypt.org" },
+  ]);
+  const result = await f.engine.read("dns.propagation", { ...zone, type: "CAA" });
+  assert.equal(result.data.resolvers_agree, true);
+  assert.equal(result.data.matches_zone, true);
+  assert(result.data.zone_values.includes('0 issue "letsencrypt.org"'));
+});
+
 test("audit: a typical Infomaniak mail zone with delegated DKIM is clean apart from info", () => {
   const findings = auditRecords([
     rec("MX", ".", "5 mta-gw.infomaniak.ch."),

@@ -46,14 +46,20 @@ async function connect(t) {
 }
 
 test(
-  "built gateway advertises exactly three read tools and uses a real MCP child",
+  "built gateway advertises three provider tools and two documentation tools and uses a real MCP child",
   { timeout: 30_000 },
   async (t) => {
     const client = await connect(t);
     const { tools } = await client.listTools();
     assert.deepEqual(
       tools.map((tool) => tool.name),
-      ["infomaniak_status", "infomaniak_search", "infomaniak_read"],
+      [
+        "infomaniak_status",
+        "infomaniak_search",
+        "infomaniak_read",
+        "infomaniak_docs_search",
+        "infomaniak_docs_read",
+      ],
     );
     assert(tools.every((tool) => tool.annotations.readOnlyHint === true));
     const status = await client.callTool({ name: "infomaniak_status", arguments: {} });

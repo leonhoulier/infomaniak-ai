@@ -1,6 +1,6 @@
 {
   "name": "infomaniak-ai",
-  "version": "0.2.0",
+  "version": "0.3.3",
   "description": "Inspect Infomaniak infrastructure; optionally use scoped API operations and independently approved writes.",
   "license": "MIT",
   "author": {
@@ -9,28 +9,28 @@
   "userConfig": {
     "api_token": {
       "type": "string",
-      "title": "Infomaniak API token",
-      "description": "Your own Infomaniak API token for the product scopes you need. Token-only discovery performs reads; a scoped policy is required for controlled writes.",
+      "title": "Connect Infomaniak",
+      "description": "Paste your Infomaniak API token here, not in chat. Use the accounts scope and only the product permissions you need. Start read-only; Claude Code keeps this sensitive setting in its credential store.",
       "required": true,
       "sensitive": true
     },
     "backend_path": {
       "type": "file",
-      "title": "Reviewed MCP server build",
+      "title": "Advanced: reviewed VPS adapter (optional)",
       "description": "Optional reviewed MCP backend for the original edition. Token-only discovery needs no backend.",
       "required": false,
       "default": ""
     },
     "backend_sha256": {
       "type": "string",
-      "title": "MCP build SHA-256",
+      "title": "Advanced: adapter checksum (optional)",
       "description": "Required with backend_path; checksum of the reviewed entry file.",
       "required": false,
       "default": ""
     },
     "policy_file": {
       "type": "file",
-      "title": "Optional API access policy",
+      "title": "Advanced: access policy (optional)",
       "description": "Private access.local.json for the controlled API runtime. Without it, start token-only discovery or the optional original read-only MCP adapter.",
       "required": false,
       "default": ""
@@ -44,7 +44,8 @@
         "INFOMANIAK_API_TOKEN": "${user_config.api_token}",
         "INFOMANIAK_MCP_SERVER_PATH": "${user_config.backend_path}",
         "INFOMANIAK_MCP_SHA256": "${user_config.backend_sha256}",
-        "INFOMANIAK_POLICY_FILE": "${user_config.policy_file}"
+        "INFOMANIAK_POLICY_FILE": "${user_config.policy_file}",
+        "INFOMANIAK_API_TOKEN_FILE": ""
       }
     }
   }

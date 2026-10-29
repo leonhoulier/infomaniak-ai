@@ -1,0 +1,13 @@
+{
+  "type": "oauth",
+  "client": {
+    "mode": "dcr"
+  },
+  "baseScopes": ["infomaniak:read"],
+  "defaultScopes": [
+    "infomaniak:read",
+    "infomaniak:write:dns",
+    "infomaniak:write:mail",
+    "infomaniak:deploy"
+  ]
+}

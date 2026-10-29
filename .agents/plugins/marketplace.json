@@ -1,0 +1,12 @@
+{
+  "name": "infomaniak-mcp",
+  "interface": { "displayName": "Infomaniak MCP" },
+  "plugins": [
+    {
+      "name": "infomaniak",
+      "source": { "source": "local", "path": "./plugins/infomaniak" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}

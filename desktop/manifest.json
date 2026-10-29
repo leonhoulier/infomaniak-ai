@@ -1,0 +1,45 @@
+{
+  "manifest_version": "0.3",
+  "name": "infomaniak-ai",
+  "display_name": "Infomaniak",
+  "version": "0.3.3",
+  "description": "Connect your Infomaniak accounts and discover your services. Start read-only, with your token in the app's private settings.",
+  "long_description": "An independent, unofficial connection for Infomaniak. Enter your API token in the extension settings, then ask: Show my Infomaniak services. If you have several accounts, you choose which one to inspect. This desktop edition starts with read-only account and product discovery. No server hosting is required. Your token is used locally to call Infomaniak; returned service information is shared with your AI client. It is not affiliated with or endorsed by Infomaniak.",
+  "author": {
+    "name": "Infomaniak AI contributors"
+  },
+  "homepage": "https://github.com/leonhoulier/infomaniak-ai",
+  "license": "MIT",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/server.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/server.js"],
+      "env": {
+        "INFOMANIAK_API_TOKEN": "${user_config.api_token}",
+        "INFOMANIAK_API_TOKEN_FILE": "",
+        "INFOMANIAK_POLICY_FILE": "",
+        "INFOMANIAK_MCP_SERVER_PATH": "",
+        "INFOMANIAK_MCP_SHA256": ""
+      }
+    }
+  },
+  "tools_generated": true,
+  "compatibility": {
+    "platforms": ["darwin", "win32"],
+    "runtimes": {
+      "node": ">=22.13"
+    }
+  },
+  "privacy_policies": ["https://www.infomaniak.com/en/legal/confidentiality-policy"],
+  "user_config": {
+    "api_token": {
+      "type": "string",
+      "title": "Connect Infomaniak",
+      "description": "Paste your Infomaniak API token here, not in chat. Use the accounts scope and only the product permissions you need. Your first connection is read-only.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

@@ -16,7 +16,10 @@ const searchInput = z
   })
   .strict();
 const readInput = z
-  .object({ operation: z.string().max(120), arguments: z.record(z.unknown()).default({}) })
+  .object({
+    operation: z.string().max(120),
+    arguments: z.record(z.string(), z.unknown()).default({}),
+  })
   .strict();
 const identity = z.object({ plan_id: z.string().uuid() }).strict();
 export class Application {

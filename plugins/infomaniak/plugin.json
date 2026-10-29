@@ -1,0 +1,36 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "infomaniak",
+  "version": "0.3.3",
+  "description": "Manage Infomaniak DNS, mail settings and VPS apps. Find current official guides for Manager tasks. Independent and unofficial.",
+  "author": {
+    "name": "L\u00e9on Houlier",
+    "url": "https://leonhoulier.com"
+  },
+  "homepage": "https://infomaniak-mcp.com",
+  "repository": "https://github.com/leonhoulier/infomaniak-ai",
+  "license": "MIT",
+  "keywords": ["infomaniak", "mcp", "dns", "mail", "vps", "deployment", "documentation"],
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/connect/SKILL.md",
+      "interface": {
+        "displayName": "Infomaniak MCP",
+        "shortDescription": "Manage Infomaniak from your AI tools",
+        "longDescription": "Connect your own Infomaniak account through private browser consent. Inspect services, manage consented DNS and mailbox settings, deploy pinned commits through your own VPS runner, and retrieve current official documentation. Each supported write has an exact preview and independent browser review. This service is independent and unofficial.",
+        "developerName": "L\u00e9on Houlier",
+        "category": "Developer Tools",
+        "capabilities": ["Read", "Write"],
+        "websiteURL": "https://infomaniak-mcp.com",
+        "privacyPolicyURL": "https://infomaniak-mcp.com/privacy",
+        "defaultPrompt": [
+          "Show my Infomaniak services and what this connection can manage.",
+          "Check the DNS and mail authentication records for a domain I choose.",
+          "Find the current official Infomaniak guide for my Manager task."
+        ],
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/icon.png"
+      }
+    }
+  }
+}

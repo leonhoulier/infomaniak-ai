@@ -1,27 +1,48 @@
 import { loadAccess } from "./access.js";
 import { request } from "node:http";
 try {
-  const config = await loadAccess(
-    process.env.INFOMANIAK_POLICY_FILE ?? "/run/secrets/access.local.json",
-  );
-  if (!config.remote) throw new Error("No listener");
-  const remote = config.remote;
-  await new Promise<void>((resolve, reject) => {
-    const req = request(
-      "http://" + (remote.host === "::1" ? "[::1]" : "127.0.0.1") + ":" + remote.port + "/healthz",
-      {
-        headers: { host: new URL(remote.public_origin).host },
-        signal: AbortSignal.timeout(3000),
-      },
-      (response) => {
-        response.resume();
-        if (response.statusCode === 200) resolve();
-        else reject(new Error("Unhealthy"));
-      },
+  if (process.env.INFOMANIAK_HOSTED_ORIGIN) {
+    const origin = new URL(process.env.INFOMANIAK_HOSTED_ORIGIN);
+    await new Promise<void>((resolve, reject) => {
+      const req = request(
+        "http://127.0.0.1:" + (process.env.INFOMANIAK_HOSTED_PORT ?? "8787") + "/healthz",
+        { headers: { host: origin.host }, signal: AbortSignal.timeout(3000) },
+        (response) => {
+          response.resume();
+          if (response.statusCode === 200) resolve();
+          else reject(new Error("Unhealthy"));
+        },
+      );
+      req.once("error", reject);
+      req.end();
+    });
+  } else {
+    const config = await loadAccess(
+      process.env.INFOMANIAK_POLICY_FILE ?? "/run/secrets/access.local.json",
     );
-    req.once("error", reject);
-    req.end();
-  });
+    if (!config.remote) throw new Error("No listener");
+    const remote = config.remote;
+    await new Promise<void>((resolve, reject) => {
+      const req = request(
+        "http://" +
+          (remote.host === "::1" ? "[::1]" : "127.0.0.1") +
+          ":" +
+          remote.port +
+          "/healthz",
+        {
+          headers: { host: new URL(remote.public_origin).host },
+          signal: AbortSignal.timeout(3000),
+        },
+        (response) => {
+          response.resume();
+          if (response.statusCode === 200) resolve();
+          else reject(new Error("Unhealthy"));
+        },
+      );
+      req.once("error", reject);
+      req.end();
+    });
+  }
 } catch {
   process.exitCode = 1;
 }

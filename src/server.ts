@@ -8,6 +8,21 @@ import { Gateway } from "./gateway.js";
 import { createProtocol } from "./protocol.js";
 
 async function main(): Promise<void> {
+  if (process.argv[2] === "runner") {
+    const { runnerCli } = await import("./runner-cli.js");
+    await runnerCli(process.argv.slice(3));
+    return;
+  }
+  if (process.argv[2] === "setup") {
+    const { setup } = await import("./setup.js");
+    await setup(process.argv.slice(3));
+    return;
+  }
+  if (process.argv.includes("--hosted")) {
+    const { startHosted } = await import("./hosted.js");
+    await startHosted();
+    return;
+  }
   const flag = process.argv.indexOf("--config");
   const path = flag >= 0 ? process.argv[flag + 1] : process.env.INFOMANIAK_POLICY_FILE?.trim();
   if (flag >= 0 && !path)
@@ -146,6 +161,16 @@ async function main(): Promise<void> {
   await server.connect(new StdioServerTransport());
 }
 main().catch((error: unknown) => {
+  if (process.argv[2] === "setup") {
+    console.error(
+      "\n" +
+        (error instanceof PluginError
+          ? error.message
+          : "Setup could not finish. No credential values are included in this error."),
+    );
+    process.exitCode = 1;
+    return;
+  }
   console.error(
     JSON.stringify({
       error: true,

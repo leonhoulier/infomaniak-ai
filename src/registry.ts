@@ -1,7 +1,6 @@
 import { Resolver } from "node:dns/promises";
 import { isIP } from "node:net";
 import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
 import type { Backend } from "./backend.js";
 import type { Principal, ResourceKind } from "./access.js";
 import { digest } from "./access.js";
@@ -45,7 +44,7 @@ export interface Operation {
   summary: string;
   method: string;
   path: string;
-  input: z.AnyZodObject | z.ZodEffects<z.AnyZodObject>;
+  input: z.ZodObject;
   revision: string;
   write: boolean;
   /** Infomaniak-specific facts a model needs to use this operation correctly. */
@@ -53,7 +52,7 @@ export interface Operation {
   requiresBackend?: boolean;
   resource?: (args: Args) => { kind: ResourceKind; key: string };
   read?: (api: Api, args: Args, principal: Principal, backend?: Backend) => Promise<unknown>;
-  inspect?: (api: Api, args: Args) => Promise<unknown>;
+  inspect?: (api: Api, args: Args, planId?: string) => Promise<unknown>;
   change?: (args: Args, before: unknown) => Change;
   matches?: (actual: unknown, expected: unknown) => boolean;
 }
@@ -169,11 +168,67 @@ async function forwardState(api: Api, a: Args): Promise<unknown> {
     ),
   };
 }
+/** Decode DNS TXT presentation quoting; unsupported or malformed input stays exact. */
+export function txtData(value: string): string {
+  if (!value.startsWith('"')) return value;
+  const bytes: Buffer[] = [];
+  let i = 0;
+  try {
+    while (i < value.length) {
+      if (value[i++] !== '"') return value;
+      let closed = false;
+      while (i < value.length) {
+        const char = value[i++];
+        if (char === '"') {
+          closed = true;
+          break;
+        }
+        if (char === "\\") {
+          if (i >= value.length) return value;
+          const decimal = value.slice(i, i + 3);
+          if (/^[0-9]{3}$/.test(decimal)) {
+            const n = Number(decimal);
+            if (n > 255) return value;
+            bytes.push(Buffer.from([n]));
+            i += 3;
+          } else {
+            const point = String.fromCodePoint(value.codePointAt(i)!);
+            bytes.push(Buffer.from(point));
+            i += point.length;
+          }
+        } else {
+          const point = String.fromCodePoint(value.codePointAt(i - 1)!);
+          bytes.push(Buffer.from(point));
+          i += point.length - 1;
+        }
+      }
+      if (!closed) return value;
+      if (i < value.length && !/\s/.test(value[i]!)) return value;
+      while (i < value.length && /\s/.test(value[i]!)) i++;
+    }
+    return new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(bytes));
+  } catch {
+    return value;
+  }
+}
+export function dnsTargetValue(type: string, target: string): string {
+  if (type === "TXT") return txtData(target);
+  if (["CNAME", "NS"].includes(type)) return target.trim().toLowerCase().replace(/\.$/, "");
+  if (type === "MX") {
+    const match = /^(\d+)\s+(\S+)$/.exec(target.trim());
+    if (match) return Number(match[1]) + " " + match[2]!.toLowerCase().replace(/\.$/, "");
+  }
+  if (type === "AAAA" && isIP(target) === 6)
+    return new URL("http://[" + target + "]").hostname.slice(1, -1);
+  return target;
+}
 const recordsMatch = (a: unknown, b: unknown): boolean => {
   const semantic = (data: unknown) =>
     sorted(
       list(data).map((v) => {
         const { id: _, ...rest } = object(v);
+        if (typeof rest.type === "string" && typeof rest.target === "string")
+          rest.target = dnsTargetValue(rest.type, rest.target);
         return rest;
       }),
     );
@@ -382,6 +437,15 @@ const operations: Operation[] = [
       const rows = list(b).map(object),
         row = rows.find((r) => r.id === a.record_id);
       if (!row) throw new PluginError("resource_not_found", "The selected record is absent.");
+      if (
+        typeof a.target === "string" &&
+        ((row.type === "A" && isIP(a.target) !== 4) ||
+          (row.type === "AAAA" && isIP(a.target) !== 6))
+      )
+        throw new PluginError(
+          "invalid_input",
+          "The new address does not match the existing record type.",
+        );
       const body = {
         ...(a.target !== undefined ? { target: a.target } : {}),
         ...(a.ttl !== undefined ? { ttl: a.ttl } : {}),
@@ -445,6 +509,7 @@ for (const action of ["add", "delete"] as const)
           before: b,
           after: {
             ...before,
+            enabled_alias: action === "add" || aliases.length > 1,
             aliases: sorted(
               action === "add"
                 ? [...aliases, String(a.alias)]
@@ -460,7 +525,7 @@ for (const action of ["add", "delete"] as const)
                 },
           resource: "mail:" + a.mail_hosting_id + ":" + a.mailbox_name,
           impact:
-            "Change which addresses reach this mailbox. Existing aliases and delivery state are included in the precondition.",
+            "Change which addresses reach this mailbox. Adding an alias enables mailbox aliases. Infomaniak may notify mailbox users when aliases change. Existing aliases and delivery state are included in the precondition.",
           recovery: recoveryMail,
         };
       },
@@ -491,6 +556,7 @@ for (const action of ["add", "delete"] as const)
           before: b,
           after: {
             ...before,
+            is_enabled: action === "add" || recipients.length > 1,
             redirect_addresses: sorted(
               action === "add"
                 ? [...recipients, String(a.redirect_address)]
@@ -513,7 +579,7 @@ for (const action of ["add", "delete"] as const)
                 },
           resource: "mail:" + a.mail_hosting_id + ":" + a.mailbox_name,
           impact:
-            "Change an external recipient of future mail. Forwarded messages cannot be recalled.",
+            "Change an external recipient of future mail. Adding a recipient enables forwarding; removing the last recipient disables it. Forwarded messages cannot be recalled.",
           recovery: recoveryMail,
         };
       },
@@ -700,16 +766,51 @@ export const lookup = {
     return (await resolver.resolve(name, type)) as unknown[];
   },
 };
+function caa(flag: unknown, tag: unknown, value: unknown): string {
+  if (
+    !Number.isInteger(flag) ||
+    Number(flag) < 0 ||
+    Number(flag) > 255 ||
+    typeof tag !== "string" ||
+    !/^[a-z0-9]+$/i.test(tag) ||
+    typeof value !== "string"
+  )
+    throw new PluginError("invalid_response", "Invalid CAA record representation.");
+  return `${flag} ${tag.toLowerCase()} ${JSON.stringify(value)}`;
+}
+function caaTarget(target: string): string {
+  const match = /^(\d{1,3})\s+([a-z0-9]+)\s+(.+)$/i.exec(target.trim());
+  if (!match) throw new PluginError("invalid_response", "Invalid CAA target.");
+  const raw = match[3]!;
+  let value = raw;
+  if (raw.startsWith('"')) {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      throw new PluginError("invalid_response", "Unsupported CAA quoted value.");
+    }
+  } else if (/\s|"/.test(raw)) {
+    throw new PluginError("invalid_response", "Invalid CAA unquoted value.");
+  }
+  return caa(Number(match[1]), match[2], value);
+}
 function answer(type: string, v: unknown): string {
   if (type === "MX" && v && typeof v === "object") {
     const r = v as { priority?: unknown; exchange?: unknown };
     return r.priority + " " + host(String(r.exchange));
   }
   if (type === "TXT" && Array.isArray(v)) return v.join("");
-  if (type === "CAA" && v && typeof v === "object") return canonical(v);
+  if (type === "CAA") {
+    const r = object(v),
+      tags = Object.entries(r).filter(([key]) => key !== "critical");
+    if (tags.length !== 1)
+      throw new PluginError("invalid_response", "Expected one CAA property tag.");
+    return caa(r.critical, tags[0]![0], tags[0]![1]);
+  }
   return ["CNAME", "NS"].includes(type) ? host(String(v)) : String(v);
 }
 function zoneValue(type: string, target: string): string {
+  if (type === "CAA") return caaTarget(target);
   if (type === "MX") {
     const [priority, exchange] = target.trim().split(/\s+/, 2);
     return priority + " " + host(String(exchange));
@@ -842,10 +943,7 @@ operations.push(
 );
 export const OPERATIONS = new Map(operations.map((o) => [o.id, o]));
 export function inputSchema(operation: Operation): Record<string, unknown> {
-  return zodToJsonSchema(operation.input, {
-    target: "jsonSchema7",
-    $refStrategy: "none",
-  }) as Record<string, unknown>;
+  return z.toJSONSchema(operation.input, { target: "draft-7", io: "input" });
 }
 export function requireOperation(id: string): Operation {
   const op = OPERATIONS.get(id);

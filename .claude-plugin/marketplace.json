@@ -1,0 +1,16 @@
+{
+  "name": "infomaniak-mcp",
+  "owner": {
+    "name": "L\u00e9on Houlier",
+    "url": "https://leonhoulier.com"
+  },
+  "plugins": [
+    {
+      "name": "infomaniak",
+      "source": "./plugins/infomaniak",
+      "description": "Manage Infomaniak DNS, mail settings and VPS apps through the hosted MCP.",
+      "version": "0.3.3"
+    }
+  ],
+  "description": "Independent Infomaniak workflows and hosted MCP access for AI coding tools."
+}

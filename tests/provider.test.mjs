@@ -115,3 +115,25 @@ test("rejections carry Infomaniak's error code but never its description", async
   );
   await assert.rejects(odd.request("GET", "/2/x"), (e) => e.upstream === undefined);
 });
+
+test("rejected responses are bounded while streaming, before decoding their error code", async () => {
+  let chunks = 0,
+    cancelled = false;
+  const stream = new ReadableStream({
+    pull(controller) {
+      if (chunks++ < 128) controller.enqueue(new Uint8Array(8192).fill(32));
+      else controller.close();
+    },
+    cancel() {
+      cancelled = true;
+    },
+  });
+  const api = new PublicApi(
+    "fixture",
+    new RequestQueue(0),
+    async () => new Response(stream, { status: 403 }),
+  );
+  await assert.rejects(api.request("GET", "/1/accounts"), { code: "provider_error" });
+  assert.equal(cancelled, true);
+  assert(chunks <= 10, "Do not buffer the complete rejected response before applying its budget");
+});

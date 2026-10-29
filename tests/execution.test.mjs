@@ -342,3 +342,22 @@ test("a plan expiring during preflight sends no mutation", async (t) => {
   assert.equal((await f.engine.execute(p.id, p.hash)).state, "failed");
   assert.equal(f.api.calls.filter((r) => r.method !== "GET").length, 0);
 });
+
+test("quoted TXT provider readback verifies a single create without retrying the mutation", async (t) => {
+  const f = await fixture(t),
+    original = f.api.request.bind(f.api);
+  f.api.request = async (...args) => {
+    const result = await original(...args);
+    return args[0] === "GET" && args[1].endsWith("/records")
+      ? result.map((r) => (r.type === "TXT" ? { ...r, target: JSON.stringify(r.target) } : r))
+      : result;
+  };
+  const plan = await f.engine.plan("dns.record.create", {
+    ...createArgs,
+    type: "TXT",
+    target: "live-style TXT",
+  });
+  f.app.approve(f.principal, plan.id, plan.hash);
+  assert.equal((await f.engine.execute(plan.id, plan.hash)).state, "verified");
+  assert.equal(f.api.calls.filter((c) => c.method !== "GET").length, 1);
+});

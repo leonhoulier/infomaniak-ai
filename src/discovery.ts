@@ -12,12 +12,18 @@ export class Discovery {
     private readonly token: string,
     private readonly catalogue: ApiCatalogue,
     private readonly api: Api,
+    private readonly allowedAccounts?: readonly number[],
   ) {}
-  static async create(token: string, api?: Api): Promise<Discovery> {
+  static async create(
+    token: string,
+    api?: Api,
+    allowedAccounts?: readonly number[],
+  ): Promise<Discovery> {
     return new Discovery(
       token,
       await loadCatalogue(),
       api ?? new PublicApi(token, new RequestQueue(), createReadOnlyFetch(fetch)),
+      allowedAccounts,
     );
   }
   private async accountList(): Promise<Record<string, unknown>[]> {
@@ -26,8 +32,11 @@ export class Discovery {
       .map((r) => ({ id: r.id, name: r.name ?? r.customer_name ?? "" }));
     if (rows.some((r) => !Number.isSafeInteger(r.id) || Number(r.id) <= 0))
       throw new PluginError("invalid_response", "Invalid account inventory.");
-    this.accounts = new Set(rows.map((r) => Number(r.id)));
-    return rows;
+    const permitted = this.allowedAccounts
+      ? rows.filter((r) => this.allowedAccounts!.includes(Number(r.id)))
+      : rows;
+    this.accounts = new Set(permitted.map((r) => Number(r.id)));
+    return permitted;
   }
   async dispatch(name: string, input: unknown): Promise<Record<string, unknown>> {
     if (JSON.stringify(input).length > 32_000)
@@ -43,6 +52,7 @@ export class Discovery {
           products: new Set(this.catalogue.operations.map((r) => r.product)).size,
         },
         available_reads: ["accounts.list", "products.list"],
+        first_prompt: "Show my Infomaniak services. If I have several accounts, let me choose one.",
         permissions_verified: false,
         next_step:
           "Use your own account/product IDs to initialize a private policy with admin.js init. Scoped reads and independently approved writes require that policy.",
@@ -50,8 +60,8 @@ export class Discovery {
     } else if (name === "infomaniak_read") {
       const args = z
         .object({
-          operation: z.enum(["accounts.list", "products.list"]),
-          arguments: z.record(z.unknown()).default({}),
+          operation: z.enum(["accounts.list", "products.list", "resources.resolve"]),
+          arguments: z.record(z.string(), z.unknown()).default({}),
         })
         .strict()
         .parse(input);
@@ -60,7 +70,12 @@ export class Discovery {
         result = { operation: args.operation, data: await this.accountList() };
       } else {
         const a = z
-          .object({ account_id: z.number().int().positive().safe() })
+          .object({
+            account_id: z.number().int().positive().safe(),
+            ...(args.operation === "resources.resolve"
+              ? { query: z.string().trim().min(1).max(200) }
+              : {}),
+          })
           .strict()
           .parse(args.arguments);
         if (!this.accounts) await this.accountList();
@@ -72,7 +87,19 @@ export class Discovery {
             "/1/products?account_id=" + a.account_id + "&per_page=1000",
           ),
         );
-        result = { operation: args.operation, data: rows.map(productSummary) };
+        const data = rows.map(productSummary).filter((r) => r.account_id === a.account_id);
+        result = {
+          operation: args.operation,
+          account_id: a.account_id,
+          data:
+            args.operation === "resources.resolve"
+              ? data
+                  .filter((r) =>
+                    JSON.stringify(r).toLowerCase().includes(String(a.query).toLowerCase()),
+                  )
+                  .slice(0, 20)
+              : data,
+        };
       }
     } else if (name === "infomaniak_catalogue" || name === "infomaniak_search") {
       const searching = name === "infomaniak_search";

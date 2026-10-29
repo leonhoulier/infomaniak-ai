@@ -28,14 +28,14 @@ const PrincipalSchema = z
     accounts: z.array(positive).min(1).max(100),
     resources: z
       .object({
-        zones: z.record(binding).default({}),
-        dns_names: z.record(binding).default({}),
-        mail_hostings: z.record(binding).default({}),
-        mailboxes: z.record(binding).default({}),
-        vps: z.record(binding).default({}),
+        zones: z.record(z.string(), binding).default({}),
+        dns_names: z.record(z.string(), binding).default({}),
+        mail_hostings: z.record(z.string(), binding).default({}),
+        mailboxes: z.record(z.string(), binding).default({}),
+        vps: z.record(z.string(), binding).default({}),
       })
       .strict()
-      .default({}),
+      .prefault({}),
     operations: z.array(z.string().min(1).max(120)).max(200),
     writes: z.enum(["disabled", "disposable-only", "enabled"]).default("disabled"),
   })

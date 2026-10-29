@@ -18,14 +18,30 @@ export class ApiError extends PluginError {
 }
 /** Read only the error code from a rejected response; descriptions can echo input. */
 async function upstreamCode(response: Response): Promise<string | undefined> {
+  const reader = response.body?.getReader();
+  if (!reader) return undefined;
   try {
-    const text = (await response.text()).slice(0, 65_536);
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > 65_536) {
+        await reader.cancel();
+        return undefined;
+      }
+      chunks.push(value);
+    }
+    const text = Buffer.concat(chunks).toString("utf8");
     const error = (JSON.parse(text) as { error?: { code?: unknown } }).error;
     return typeof error?.code === "string" && /^[a-z][a-z0-9_]{0,79}$/.test(error.code)
       ? error.code
       : undefined;
   } catch {
     return undefined;
+  } finally {
+    reader.releaseLock();
   }
 }
 export interface Api {
@@ -34,6 +50,7 @@ export interface Api {
     path: string,
     body?: Record<string, unknown>,
     signal?: AbortSignal,
+    context?: { planId: string },
   ): Promise<unknown>;
 }
 /** One process-wide queue: conservative for central-API limits across all tenants. */

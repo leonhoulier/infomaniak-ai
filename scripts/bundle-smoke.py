@@ -18,6 +18,8 @@ const install=spawnSync('npm',['install','--prefix','/tmp/clean','--cache','/tmp
 if(install.status!==0)throw new Error('Clean bundle dependency installation failed: '+install.stderr.slice(-300));
 const binary='/tmp/clean/node_modules/infomaniak-ai/dist/server.js';
 const env={...process.env,INFOMANIAK_API_TOKEN:'fixture-package-discovery-token-only'};
+const preview=spawnSync('/tmp/clean/node_modules/.bin/infomaniak-ai',['setup','--client','codex','--dry-run'],{env,encoding:'utf8'});
+if(preview.status!==0||!preview.stderr.includes('INFOMANIAK_API_TOKEN_FILE')||preview.stderr.includes(env.INFOMANIAK_API_TOKEN))throw new Error('Installed setup preview failed');
 const doctor=spawnSync('/tmp/clean/node_modules/.bin/infomaniak-ai',['--doctor'],{env,encoding:'utf8'});
 if(doctor.status!==0)throw new Error('Installed entrypoint failed: '+(doctor.error?.code??doctor.stderr.slice(-300)));
 if(JSON.parse(doctor.stdout).mode!=='discovery-only')throw new Error('Unexpected installed mode');
@@ -29,7 +31,7 @@ transport.stderr?.on('data',()=>{});
 await client.connect(transport);
 const tools=await client.listTools();
 const status=await client.callTool({name:'infomaniak_status',arguments:{}});
-if(tools.tools.length!==4||status.structuredContent.writes_enabled!==false||status.structuredContent.catalogue.operations!==1514)throw new Error('Installed bundle has unexpected capabilities');
+if(tools.tools.length!==6||status.structuredContent.writes_enabled!==false||status.structuredContent.catalogue.operations!==1514)throw new Error('Installed bundle has unexpected capabilities');
 await client.close();
 const init=spawnSync('/tmp/clean/node_modules/.bin/infomaniak-ai-admin',['init','--directory','/tmp/private-policy','--account','10'],{env,encoding:'utf8'});
 if(init.status!==0)throw new Error('Installed administrator entrypoint failed');
@@ -39,9 +41,9 @@ scopedTransport.stderr?.on('data',()=>{});
 await scoped.connect(scopedTransport);
 const scopedTools=await scoped.listTools();
 const scopedStatus=await scoped.callTool({name:'infomaniak_status',arguments:{}});
-if(scopedTools.tools.length!==8||scopedStatus.structuredContent.writes_enabled!==false)throw new Error('Installed scoped runtime has unexpected capabilities');
+if(scopedTools.tools.length!==10||scopedStatus.structuredContent.writes_enabled!==false)throw new Error('Installed scoped runtime has unexpected capabilities');
 await scoped.close();
-console.log(JSON.stringify({passed:true,clean_install:true,node:process.version,tools:tools.tools.length,scoped_tools:scopedTools.tools.length,cli_entrypoints:true,catalogue:1514,writes:false}));
+console.log(JSON.stringify({passed:true,clean_install:true,node:process.version,tools:tools.tools.length,scoped_tools:scopedTools.tools.length,cli_entrypoints:true,setup_preview:true,catalogue:1514,writes:false}));
 """
 # This test installs executables under /tmp; Docker otherwise mounts it noexec.
 # The production runtime keeps its normal non-executable scratch mount.

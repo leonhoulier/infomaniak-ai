@@ -1,0 +1,21 @@
+name: infomaniak-ai-hosted
+services:
+  gateway:
+    extends:
+      file: hosted.compose.yaml
+      service: gateway
+    image: infomaniak-ai:${INFOMANIAK_AI_RELEASE:?Set the deployment release}
+    environment:
+      INFOMANIAK_HOSTED_TRUST_PROXY_HOPS: "1"
+    ports:
+      - "127.0.0.1:${INFOMANIAK_AI_LOCAL_PORT:-3210}:8787"
+    mem_limit: 512m
+    cpus: "1.0"
+    pids_limit: 128
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+networks:
+  gateway:

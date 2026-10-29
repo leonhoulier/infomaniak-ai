@@ -39,7 +39,9 @@ export class FixtureApi {
         return [
           {
             id: 30,
-            account_id: 10,
+            account_id: Number(
+              new URL(path, "https://api.infomaniak.com").searchParams.get("account_id"),
+            ),
             service_id: 3,
             service_name: "email_hosting",
             customer_name: "example.com",
@@ -83,11 +85,14 @@ export class FixtureApi {
         );
       else this.records = this.records.filter((r) => r.id !== Number(path.split("/").at(-1)));
     } else if (path.includes("/aliases")) {
-      if (method === "POST") this.aliases.aliases.push(body.alias);
-      else
+      if (method === "POST") {
+        this.aliases.aliases.push(body.alias);
+        this.aliases.enabled_alias = true;
+      } else
         this.aliases.aliases = this.aliases.aliases.filter(
           (v) => v !== decodeURIComponent(path.split("/").at(-1)),
         );
+      this.aliases.enabled_alias = this.aliases.aliases.length > 0;
     } else if (path.includes("/forwarding_addresses")) {
       if (method === "POST")
         this.forwarding.redirect_adresses.push({ email: body.redirect_address });
@@ -102,6 +107,8 @@ export class FixtureApi {
           this.forwarding.redirect_adresses = body.redirect_addresses.map((email) => ({ email }));
         if (body.is_enabled === false) this.forwarding.redirect_adresses = [];
       }
+      if (["POST", "DELETE"].includes(method))
+        this.forwarding.is_enabled = this.forwarding.redirect_adresses.length > 0;
     }
     if (this.failure === "uncertain") throw new ApiError(true);
     if (this.failure === "readback") this.readFailure = true;

@@ -11,7 +11,10 @@ const SearchInput = z
   })
   .strict();
 const ReadInput = z
-  .object({ operation: z.string().min(1).max(120), arguments: z.record(z.unknown()).default({}) })
+  .object({
+    operation: z.string().min(1).max(120),
+    arguments: z.record(z.string(), z.unknown()).default({}),
+  })
   .strict();
 
 function admitted(catalogue: Catalogue): Set<ReadName> {

@@ -1,8 +1,12 @@
-# Hosting on Infomaniak
+# Hosting the scoped policy edition on Infomaniak
 
-Local use requires no server. This guide describes the optional self-hosted
-Streamable HTTP edition on an Infomaniak VPS. It does not deploy anything or
-establish production qualification.
+For the public service with self-service customer onboarding and OAuth, use the
+[shared hosted edition](hosted.md). Customers of that service do not follow this
+deployment guide or need their own VPS.
+
+This guide describes the separate, optional self-hosted policy edition with
+scoped reads and independently approved writes. Local use requires no server.
+These instructions do not deploy anything or establish production qualification.
 
 ## Current authentication
 
@@ -11,9 +15,9 @@ approval key and a distinct provider API token. Only hashes of the first two are
 stored in the private policy. Provider credentials come from the named environment
 variable or private `_FILE` source. There is no shared operator token for customers.
 
-This version supports clients that can configure a Bearer header. It does not
-implement an OAuth authorization server, public user registration or Infomaniak
-SSO. A client requiring an OAuth connection flow cannot use that onboarding yet.
+This policy edition supports clients that can configure a Bearer header. Its
+manually provisioned credentials are separate from the hosted edition's public
+OAuth onboarding. Neither edition implements Infomaniak SSO.
 
 The same process can serve several explicitly provisioned principals, with
 separate grants and operation namespaces. Automated registration, credential

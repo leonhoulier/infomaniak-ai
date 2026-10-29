@@ -1,5 +1,10 @@
 # Contributing
 
+Contributions are welcome. Start with a reproducible bug, a client compatibility
+check, a documentation correction or a small Infomaniak operation. Use an issue
+to discuss larger changes before writing them. You do not need an Infomaniak
+account to run the fixture tests.
+
 Keep provider fixes in the upstream MCP where possible. This repository owns the
 plugin interface, capability policy, skills and cross-product workflows.
 
@@ -42,3 +47,4 @@ claude plugin validate .
 
 Do not commit secrets, real account fixtures, generated build output or install
 state. No generated-code footers or co-author trailers are added automatically.
+Use [the private security reporting route](SECURITY.md) for vulnerabilities.

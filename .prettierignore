@@ -3,3 +3,4 @@ dist/
 artifacts/
 coverage/
 package-lock.json
+desktop/mcpb-manifest.schema.json

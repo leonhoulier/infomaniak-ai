@@ -34,7 +34,7 @@ Local AI client                     Remote AI client
 
 The public catalogue contains 1,514 pinned method/path entries. It is discovery
 data, not an execution manifest. Sixteen selected public schemas retain their
-source URLs. The reviewed registry currently has nine read and eight write
+source URLs. The reviewed registry currently has twelve read and eight write
 handlers. Other entries cannot execute, regardless of model arguments.
 
 The gateway keeps a small tool interface: status, search, catalogue, read, plan,

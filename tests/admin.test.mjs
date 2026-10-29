@@ -101,7 +101,7 @@ test("actual stdio entrypoint runs the scoped edition without touching provider 
   const client = new Client({ name: "scoped-stdio-test", version: "1.0" });
   t.after(() => client.close());
   await client.connect(transport);
-  assert.equal((await client.listTools()).tools.length, 8);
+  assert.equal((await client.listTools()).tools.length, 10);
   const status = await client.callTool({ name: "infomaniak_status", arguments: {} });
   assert.equal(status.structuredContent.catalogue.operations, 1514);
   assert.equal(status.structuredContent.writes_enabled, false);

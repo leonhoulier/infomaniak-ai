@@ -25,21 +25,32 @@ explained by the assistant.
 
 ## Hosting choices
 
-Version 0.2 implements local stdio and authenticated self-hosted HTTP. Its human
-approval interface, private SQLite journal and manually provisioned principals
-are tested with fixtures. A public managed service and OAuth onboarding are not
-implemented; see [hosting.md](hosting.md) for the exact deployment boundary.
+The primary public product is a shared service on Infomaniak. Any customer can
+connect their own token through browser consent, without an invitation, private
+account configuration or customer-managed VPS. The [hosted edition](hosted.md)
+implements this self-service OAuth flow with isolated credentials and one
+approved account per connection. The public pilot is deployed and verified at
+`https://infomaniak-mcp.com/mcp`; new client registrations offer read and write access by default, with a
+read-only choice. Version 0.3 supports consented domains and mailbox administration,
+paired customer-owned deployments and private history. Every exact change needs
+independent browser approval. Native compatibility is recorded per client at
+`/clients/status.json`; implemented features and live release evidence remain
+separate. See [resource workflows](resource-workflows.md).
 
 The local plugin needs no hosted service. Each user's MCP client launches it on
 their computer and supplies that user's credentials. This remains a supported
 installation mode as the product grows.
 
-Offer a remote MCP service on Infomaniak when browser-based clients or shared
-access justify it. Start with an isolated single-owner instance on a suitable VPS;
-size it from measured load. Multi-user hosting is a later, separate release gate:
-it requires authenticated HTTPS, per-user credential isolation, authorization,
-durable operations and independently authenticated approval. An HTTP wrapper
-around today's stdio process is insufficient.
+The operator deploys the shared service once and sizes it from measured load.
+Customers use the same HTTPS endpoint with their own consent and credentials.
+Public TLS, OAuth/MCP account discovery, restart, revocation and isolated backup
+recovery have live evidence. Native AI client compatibility still needs
+qualification before a wider release.
+
+The separate [self-hosted policy edition](hosting.md) implements scoped reads,
+independent human approval, a private SQLite operation journal and manually
+provisioned principals. Bringing those resource operations and write controls
+into hosted customer accounts remains additional integration work.
 
 Use the same catalogue, operation contracts and safety rules in both modes. A
 managed service must never use the operator's own Infomaniak token for customers.
@@ -80,8 +91,9 @@ Targets below are acceptance criteria, not measured results:
    recorded outcome and verification. Unknown outcomes require reconciliation.
 5. Fixture tests run without credentials. Mutating live tests use explicitly
    designated disposable targets; lack of a test product remains visible.
-6. Users can install locally without operating a server. Remote clients receive
-   equivalent policy protection when a hosted edition is released.
+6. Customers can connect through a hosted endpoint without installing software.
+   Local installation remains an alternative. Hosted discovery is bound to explicit
+   per-client account consent; wider scoped actions retain independent approval.
 
 ## User stories
 
@@ -137,11 +149,12 @@ cross-account access, stale plans, replayed approvals and duplicate uncertain
 writes fail. A supported write completes against a disposable live target,
 including readback and tested failure handling, before that operation is enabled.
 
-## P2: expand reads and writes by product — first 17 reviewed handlers
+## P2: expand reads and writes by product — first 20 reviewed handlers
 
-Nine reads and eight writes cover scoped inventory, DNS records, mailbox aliases
-and forwarding; two VPS reads reuse the separately reviewed MCP. Other catalogue
-entries remain discoverable gaps. Default configuration disables all writes;
+Twelve reads and eight writes cover scoped inventory, domain expiry, DNS records,
+mail-authentication audits, propagation, mailbox aliases and forwarding; two VPS
+reads reuse the separately reviewed MCP. Other catalogue
+entries remain discoverable gaps. The policy edition initial configuration disables writes;
 selected disposable resources are required to qualify actual provider mutations.
 
 Named DNS grants constrain writes to one source label; mailbox grants constrain
@@ -171,16 +184,25 @@ a typed adapter for an established release engine. Coolify and Dokploy are
 candidates, not dependencies of broad API coverage or verified integrations.
 Do not install a release engine on an existing server as part of API discovery.
 
-## P3: remote access and distribution — self-hosting implemented
+## P3: remote access and distribution — hosted pilot deployed
 
-The self-hosted edition supports application-specific Bearer credentials, separate
+The [hosted signup edition](hosted.md) adds browser consent, standard MCP OAuth
+with S256 PKCE, encrypted per-customer provider tokens, one approved account per
+connection, rotating refresh tokens and deletion/revocation. It starts with four
+read-only discovery tools and reuses the same MCP protocol and provider code.
+The public pilot has live TLS, consent, MCP read, restart and revocation checks,
+plus a verified isolated restore of its encrypted backup. Native platform sign-in
+qualification and marketplace distribution remain separate work.
+
+The policy-based self-hosted edition supports application-specific Bearer credentials, separate
 human approval keys, per-principal policy/state and distinct provider tokens. The
 pinned Docker/Caddy package is prepared; an isolated container test validates
 non-root/read-only operation, disabled networking and crash restart. Production
 TLS, real VPS deployment, native client onboarding and operational restore proof
 still require live evidence. These are not implied by fixture success.
 
-- Infomaniak-hosted remote MCP, starting with single-owner deployment.
+- One shared Infomaniak-hosted remote MCP service with self-service customer
+  connections. Local installation and private hosting remain alternatives.
 - Separate MCP authentication from downstream Infomaniak credentials; verify the
   product scopes available through any delegated OAuth flow before relying on it.
 - Tenant isolation, per-client consent, protected approvals, encrypted credential
@@ -196,7 +218,7 @@ The runtime implements controlled writes and authenticated HTTP, with writes
 disabled by default. It has no application deployment, promotion, rollback,
 arbitrary SSH, billing actions or credential-returning routes. Tests and exact
 proof boundaries are recorded in [validation.md](validation.md). Most API
-families, OAuth onboarding and automated multi-user provisioning remain work.
+families, wider hosted operation scopes and production qualification remain work.
 
 - Public catalogue metadata is not a complete schema or a live test. Products
   unavailable in the test account must be marked unverified.
@@ -211,3 +233,9 @@ families, OAuth onboarding and automated multi-user provisioning remain work.
   discovery and the native DNS/mail operations do not need it.
 - Disposable resources and any future remote host remain to be selected. Existing
   production services are not disposable test targets.
+
+## Current competitive priorities
+
+See [competitive-product.md](competitive-product.md) for the 28 October benchmark
+and concrete release criteria: useful hosted DNS, mail administration, VPS
+deployment, native onboarding, product-aware discovery and private operation history.

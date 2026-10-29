@@ -1,0 +1,55 @@
+{
+  "version": "0.3.1",
+  "operations": {
+    "dns.record.create": {
+      "revision": "1:529c494a858d495fae50b8cc8f2f2ba876c4a9bcb37221cd5f29f6aed714c03a",
+      "method": "POST",
+      "path": "/2/zones/{zone}/records"
+    },
+    "dns.record.update": {
+      "revision": "1:a0993fb55de7b9e9778f74013dc732cf251407f7f800314b8f06f05946b64fab",
+      "method": "PUT",
+      "path": "/2/zones/{zone}/records/{record}"
+    },
+    "dns.record.delete": {
+      "revision": "1:790f1f4a846b7a7152d8cfbd1a032dda28035f1225934272f7d5abe733391d06",
+      "method": "DELETE",
+      "path": "/2/zones/{zone}/records/{record}"
+    },
+    "mail.alias.add": {
+      "revision": "1:2c852cc623a69731534d1186e5f09ac9909fbffb4d90c78d42c2c3e6ab450c35",
+      "method": "POST",
+      "path": "/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/aliases"
+    },
+    "mail.alias.delete": {
+      "revision": "1:91f744ed9d3edaccf2b00de2141a5d689dcd46a98f408d2a951be50683ad96e6",
+      "method": "DELETE",
+      "path": "/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/aliases/{alias}"
+    },
+    "mail.forwarding.add": {
+      "revision": "1:fc4280089eae6520192d5b839771c0b7fc74f3004abe4851a363e2eefd6b66aa",
+      "method": "POST",
+      "path": "/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses"
+    },
+    "mail.forwarding.delete": {
+      "revision": "1:bf32e1f9a080a2066778283a4b2d23a6e02279c2672db6a282eb16b8859a10a7",
+      "method": "DELETE",
+      "path": "/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses/{redirect_addresses}"
+    },
+    "mail.forwarding.update": {
+      "revision": "1:579494767299bf452b36fa00facaf35162bef98caac2e97d627a22ecc7236c3f",
+      "method": "PUT",
+      "path": "/1/mail_hostings/{mail_hosting_id}/mailboxes/{mailbox_name}/forwarding_addresses"
+    },
+    "deployment.release": {
+      "revision": "1:5243ff2457b7468948d53339bf6a1a3ba970aa529e125ed5067319dd18b73457",
+      "method": "POST",
+      "path": "/runner/{runner_id}/apps/{app}"
+    },
+    "deployment.rollback": {
+      "revision": "1:245233c6abe9687b87be32045833485e7a81fe5588f82380818415f3d12978cc",
+      "method": "POST",
+      "path": "/runner/{runner_id}/apps/{app}"
+    }
+  }
+}

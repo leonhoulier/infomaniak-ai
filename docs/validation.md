@@ -1,125 +1,51 @@
-# Validation — 20 October 2026
+# Validation
 
-Version 0.2 is an unpublished development build. It has full public catalogue
-discovery, 17 reviewed operations and controlled execution. All eight write
-handlers have fixture coverage; none has disposable live mutation qualification.
-Initialized policies disable writes and writable resource grants.
+## Release 0.3.3
 
-## Local and protocol checks
+The release adds client-native confirmation through MCP form elicitation, with
+browser review for clients without form support and for the JSON API. Neither
+a model argument nor installation consent approves an individual write.
 
-- 61 Node tests pass on macOS with Node 24.18.1 and on Debian Linux with Node
-  22.23.3, after strict TypeScript compilation.
-- Three Python catalogue-import tests pass, including staff filtering,
-  deterministic output and invalid/conflicting metadata rejection.
-- Formatting and Claude Code 2.1.304 manifest validation pass. The validator advises
-  adding a marketplace install command when one exists; no marketplace release
-  has occurred.
-- `npm audit --omit=dev` reports zero known runtime dependency vulnerabilities.
-  Dependencies are pinned. This does not audit the operating-system images or
-  the optional upstream adapter's dependency tree.
-- A macOS/Linux, Node 22/24 CI matrix and an isolated container job are prepared.
-  No remote CI run has occurred. Test-file concurrency is capped at two to avoid
-  process-startup timeouts under heavy parallel load.
+The local regression suite contains 196 tests, including 26 native-confirmation
+tests using the standard MCP SDK over real HTTP and synthetic provider data.
+Coverage includes confirmation, refusal, replay, expiry, permission changes,
+cross-connection isolation, cancellation during final ownership reads, batch
+limits and confirmation replies under full tool capacity.
 
-The tests exercise the compiled entrypoints through real MCP SDK stdio/HTTP
-clients, using fake credentials and provider fixtures. They cover all eight
-write handlers, exact previews, strict account/resource grants, narrow DNS-name
-and mailbox scope, independent approval, expiry, stale state, replay, uncertainty,
-readback failures, durable locks, crash recovery and private state permissions.
-Plan fingerprints are independent of object insertion order and locale.
-The real healthcheck entrypoint reaches IPv4 and IPv6 listeners with the
-configured public Host header.
+Validation also covers compilation, formatting, Python checks, dependency audit,
+plugin manifests and package integrity. The deployment process checks the built
+image without networking and tests an upgrade against an isolated copy of the
+encrypted store. Private credentials, account identifiers, provider responses
+and operator records are excluded from the public source and release assets.
 
-Two remote principals are exercised: one cannot read, approve or execute the
-other's plans. Tests also cover credential-role separation, approval login/logout,
-Origin/Host validation, CSRF, HTML escaping, body limits and default write rejection.
-HTTP tests submit actual approval forms; they are not visual browser tests.
+## What this establishes
 
-The existing three-tool read-only edition remains covered, including entry-file
-integrity, narrow child environment and a fake backend attempting a prohibited
-POST. Catalogue entries cannot admit themselves to execution. Provider requests
-reject foreign origins/redirects, suppress error bodies, enforce response limits
-and never automatically retry mutations. Incomplete pagination fails explicitly.
+Fixture tests exercise the protocol and lifecycle under controlled conditions.
+Package checks establish which files and checksums were released. Live checks
+establish the observed service version, HTTPS metadata and download availability.
+These are separate kinds of evidence.
 
-## Packaging and container checks
+Prior live qualification covered scoped DNS and mailbox operations, a disposable
+stateless app deployment and rollback, and authenticated documentation reads.
+Fresh Claude web consent and Codex OAuth/model calls passed on 0.3.2. Those results
+do not establish usable native confirmation in every client on 0.3.3.
 
-The local npm bundle installs in a clean Node container with no host credentials,
-backend or author policy. The installed entrypoint starts token-only discovery,
-advertises four tools and reports 1,514 catalogue entries with writes disabled.
-That test performs no Infomaniak calls. Dependency installation uses the npm
-registry; dependencies are not embedded in the tarball.
+For current, version-bound client evidence, use
+[/clients](https://infomaniak-mcp.com/clients). Fresh installs, a client-rendered
+confirmation and an end-to-end write must be qualified for each advertised
+client. Directory publication is a separate review process.
 
-The runtime image builds from a digest-pinned Node base. Its isolated smoke test
-passes with eight HTTP tools, disabled writes, a non-root user, read-only root
-filesystem and networking disabled. A forced process kill/restart and the real
-healthcheck command pass. Compose configuration and Caddy configuration validation
-also pass; neither proves public TLS or deployment on a VPS.
+## Reproduce locally
 
-## Correction and update — reads checked against live response shapes
+```sh
+npm ci --ignore-scripts
+npm test
+npm run format:check
+python3 -m unittest discover -s tests -p 'test_*.py'
+npm audit --omit=dev
+```
 
-The 11:39 UTC run below checked that each read succeeded, not what it returned.
-Comparing with live responses later showed three reads returned almost nothing:
-
-- `products.list` picked `name`, `type`, `status` and `fqdn`, which products do
-  not have, so it returned bare IDs. `/1/products` also pages at 15 items with
-  `{ page, pages }`, so an 18-product account silently got 15.
-- `mail.mailboxes.list` and `mail.mailbox.get` read `name` and `email`; the API
-  returns `mailbox_name` and `mailbox`.
-
-These are fixed (`per_page=1000`, and `pages > page` is now `incomplete_response`),
-and the test fixtures now use the real shapes. A new live run, GET-only and with
-writes disabled, passed: all 18 products with names, six mailboxes with names and
-addresses, one mailbox's detail, all 12 domains with UTC expiry dates, a DNS audit,
-NS and MX propagation compared with the zone, and refusal of an ungranted zone.
-One NS propagation attempt saw a Cloudflare timeout; it was reported as a failure,
-and three reruns agreed.
-
-The write qualification script (`scripts/qualify-writes.mjs`) was run live up to
-the first approval: it refused a name outside the disposable grant and planned a
-TXT record against the live zone. No approval was given, and the zone was
-unchanged afterwards. No live write has been made through this plugin yet.
-
-## Live read-only evidence (earlier run)
-
-At 11:39 UTC, 12 live checks passed through the controlled runtime and token-only
-discovery edition. They cover all nine reviewed reads, including firewall reads
-for both accessible VPS, plus public account/product discovery. The selected mail
-hosting returns six mailboxes and its DNS zone returns 21 records.
-
-Writes stayed disabled. The harness also enforced GET-only provider transport;
-no domain, mailbox or server settings were changed. The existing provider token
-was supplied only through the test process environment, not saved by the plugin.
-Live account identifiers and output remain outside this repository and bundle.
-
-VPS reads used a detached, clean development build of the existing MCP at
-`341ea66`, with its entry-file checksum configured explicitly. That token-only
-VPS capability is not an assumed published upstream release. The checksum covers
-the entry file, not the entire dependency graph.
-
-Private evidence outside this repository includes:
-
-- `../live-validation/controlled-api-smoke-results.json`
-- `../infomaniak-ai-tests.log` and `../infomaniak-ai-node22-tests.log`
-- `../infomaniak-ai-bundle-smoke.json`
-- `../infomaniak-ai-container-smoke.json`
-- `../infomaniak-ai-docker-build.log`
-- `../infomaniak-ai-audit.json` and `../infomaniak-ai-format.log`
-
-## Remaining release gates
-
-Most of the 1,514 catalogue entries have no executable adapter. Their visibility
-does not establish schemas, permissions or live compatibility. Public Cloud and
-other separately documented service APIs need their own reviewed integrations.
-
-No live mutation, application deployment, preview, promotion/rollback, arbitrary
-SSH action or VPS lifecycle write has been verified or enabled by default. A
-provider state matching the plan does not prove DNS propagation, mail delivery
-or application health. External edits can race without provider conditional-write
-support; unknown outcomes remain locked instead of being retried.
-
-No public Infomaniak-hosted instance, production TLS, operational restore exercise,
-OAuth/SSO onboarding or public signup flow has been tested. Remote clients require
-manually provisioned Bearer credentials and separate provider/human credentials.
-Native Claude and other AI-client onboarding have not been exercised end to end;
-manifest validation and SDK tests do not establish that result. No global user
-client settings have been changed, and nothing has been published or deployed.
+Tests use temporary stores and fake credentials. Do not load real provider
+credentials, SSH configuration or live resource settings into fixture runs.
+See [testing.md](testing.md) for live-test boundaries and
+[reviewer-testing.md](reviewer-testing.md) for the directory review cases.

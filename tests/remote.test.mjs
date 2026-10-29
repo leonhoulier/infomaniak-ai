@@ -73,7 +73,7 @@ test("a standard SDK client discovers tools and executes only independently appr
   t.after(() => client.close());
   await client.connect(transport);
   const tools = await client.listTools();
-  assert.equal(tools.tools.length, 8);
+  assert.equal(tools.tools.length, 10);
   assert(!tools.tools.some((t) => t.name.includes("approve")));
   const result = await client.callTool({
     name: "infomaniak_plan",
@@ -253,4 +253,138 @@ test("human approval logout invalidates its session without changing provider st
   assert(logout.headers.get("set-cookie").includes("Max-Age=0"));
   assert.equal((await f.request("/approvals", { headers: { cookie } })).status, 303);
   assert.equal(f.api.calls.length, 0);
+});
+
+test("JSON write API plans without mutation, requires independent browser approval and executes once", async (t) => {
+  const f = await remoteFixture(t);
+  const headers = { authorization: "Bearer " + CLIENT_KEY, "content-type": "application/json" };
+  const api = (path, data) =>
+    f.request(
+      "/api/v1/" + path,
+      data === undefined ? { headers } : { method: "POST", headers, body: JSON.stringify(data) },
+    );
+  const status = await (await api("capabilities")).json();
+  assert.equal(status.writes_enabled, true);
+  const result = await api("plans", { operation: "dns.record.create", arguments: createArgs });
+  assert.equal(result.status, 201);
+  const { plan, approval_url } = await result.json();
+  assert.equal(approval_url, "/approvals/" + plan.id);
+  assert.equal(f.api.calls.filter((c) => c.method !== "GET").length, 0);
+  const denied = await api("plans/" + plan.id + "/execute", { plan_hash: plan.hash });
+  assert.equal(denied.status, 409);
+  assert.equal((await denied.json()).error, "approval_required");
+  const { cookie } = await f.login();
+  const html = await (await f.request(approval_url, { headers: { cookie } })).text();
+  const csrf = /name="csrf" value="([^"]+)"/.exec(html)[1];
+  assert.equal(
+    (
+      await f.request(approval_url, {
+        method: "POST",
+        headers: { cookie, origin: f.base, "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ csrf, plan_hash: plan.hash, ack: "APPROVE" }),
+      })
+    ).status,
+    303,
+  );
+  const applied = await api("plans/" + plan.id + "/execute", { plan_hash: plan.hash });
+  assert.equal(applied.status, 200);
+  assert.equal((await applied.json()).plan.state, "verified");
+  assert.equal((await api("plans/" + plan.id + "/execute", { plan_hash: plan.hash })).status, 409);
+  assert.equal(f.api.calls.filter((c) => c.method !== "GET").length, 1);
+  assert.equal((await (await api("plans/" + plan.id)).json()).plan.state, "verified");
+});
+
+test("write API refuses approval/provider keys, query credentials, unreviewed writes and unsafe bodies", async (t) => {
+  const f = await remoteFixture(t);
+  const headers = { authorization: "Bearer " + CLIENT_KEY, "content-type": "application/json" };
+  for (const key of [undefined, HUMAN_KEY, PROVIDER_KEY])
+    assert.equal(
+      (
+        await f.request("/api/v1/capabilities", {
+          headers: key ? { authorization: "Bearer " + key } : {},
+        })
+      ).status,
+      401,
+    );
+  assert.equal((await f.request("/api/v1/capabilities?token=fixture", { headers })).status, 400);
+  assert.equal((await f.request("/api/v1/plans", { headers })).status, 405);
+  for (const [body, expected] of [
+    ["{", 400],
+    [JSON.stringify({ huge: "x".repeat(17000) }), 413],
+    [
+      JSON.stringify({
+        operation: "dns.record.create",
+        arguments: { ...createArgs, account_id: 20 },
+      }),
+      403,
+    ],
+    [JSON.stringify({ operation: "vps.delete", arguments: createArgs }), 403],
+  ]) {
+    const r = await f.request("/api/v1/plans", { method: "POST", headers, body });
+    assert.equal(r.status, expected);
+    const text = await r.text();
+    assert(!text.includes(PROVIDER_KEY));
+  }
+  assert.equal(
+    (
+      await f.request("/api/v1/plans", {
+        method: "POST",
+        headers: { authorization: "Bearer " + CLIENT_KEY },
+        body: "{}",
+      })
+    ).status,
+    415,
+  );
+  assert.equal(
+    (await f.request("/api/v1/approve", { method: "POST", headers, body: "{}" })).status,
+    404,
+  );
+  assert.equal(f.api.calls.filter((c) => c.method !== "GET").length, 0);
+});
+
+test("write API binds plan access to the authenticated tenant and cancellation prevents execution", async (t) => {
+  const key = "fixture-second-rest-client-".repeat(3);
+  const f = await remoteFixture(t, (cfg) => {
+    const p = structuredClone(cfg.principals[0]);
+    p.id = "other";
+    p.credential_env = "FIXTURE_PROVIDER_2";
+    p.access_token_sha256 = digest(key);
+    p.approval_token_sha256 = digest("fixture-other-rest-human-".repeat(3));
+    cfg.principals.push(p);
+  });
+  const owner = { authorization: "Bearer " + CLIENT_KEY, "content-type": "application/json" };
+  const other = { authorization: "Bearer " + key, "content-type": "application/json" };
+  const p = await f.engine.plan("dns.record.create", createArgs);
+  assert.equal((await f.request("/api/v1/plans/" + p.id, { headers: other })).status, 404);
+  assert.equal(
+    (
+      await f.request("/api/v1/plans/" + p.id + "/execute", {
+        method: "POST",
+        headers: other,
+        body: JSON.stringify({ plan_hash: p.hash }),
+      })
+    ).status,
+    404,
+  );
+  assert.equal(
+    (
+      await f.request("/api/v1/plans/" + p.id + "/cancel", {
+        method: "POST",
+        headers: owner,
+        body: "{}",
+      })
+    ).status,
+    200,
+  );
+  assert.equal(
+    (
+      await f.request("/api/v1/plans/" + p.id + "/execute", {
+        method: "POST",
+        headers: owner,
+        body: JSON.stringify({ plan_hash: p.hash }),
+      })
+    ).status,
+    409,
+  );
+  assert.equal(f.api.calls.filter((c) => c.method !== "GET").length, 0);
 });

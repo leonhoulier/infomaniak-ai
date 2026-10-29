@@ -11,6 +11,7 @@ import type { Principal } from "./access.js";
 import { matchesSecret } from "./access.js";
 import type { Application } from "./application.js";
 import { PluginError } from "./errors.js";
+import { handleWriteApi } from "./write-api.js";
 import { createProtocol } from "./protocol.js";
 
 const escape = (v: unknown) =>
@@ -109,14 +110,32 @@ export function createRemote(app: Application): HttpServer {
         send(res, 200, '{"ok":true}', "application/json");
         return;
       }
-      if (url.pathname === "/mcp") {
+      if (url.pathname === "/mcp" || url.pathname.startsWith("/api/v1/")) {
         const match = /^Bearer ([^\s]{32,256})$/.exec(req.headers.authorization ?? "");
         const p = match
           ? app.config.principals.find((p) => matchesSecret(match[1]!, p.access_token_sha256))
           : undefined;
         if (!p) {
           res.setHeader("www-authenticate", 'Bearer realm="infomaniak-ai"');
-          send(res, 401, "Unauthorized", "text/plain");
+          send(
+            res,
+            401,
+            url.pathname.startsWith("/api/v1/") ? '{"error":"unauthorized"}' : "Unauthorized",
+            url.pathname.startsWith("/api/v1/") ? "application/json" : "text/plain",
+          );
+          return;
+        }
+        if (url.pathname.startsWith("/api/v1/")) {
+          if ((inflight.get(p.id) ?? 0) >= 8) {
+            send(res, 429, '{"error":"too_many_requests"}', "application/json");
+            return;
+          }
+          inflight.set(p.id, (inflight.get(p.id) ?? 0) + 1);
+          try {
+            await handleWriteApi(req, res, app, p, url.pathname, () => body(req, 16_384));
+          } finally {
+            inflight.set(p.id, (inflight.get(p.id) ?? 1) - 1);
+          }
           return;
         }
         if (req.method !== "POST") {

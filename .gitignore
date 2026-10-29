@@ -14,3 +14,6 @@ __pycache__/
 runtime.lock
 mcp-token
 approval-key
+hosted-key
+
+release-assets/

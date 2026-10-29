@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "infomaniak": { "type": "http", "url": "https://infomaniak-mcp.com/mcp" }
+  }
+}
