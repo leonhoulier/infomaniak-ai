@@ -882,9 +882,7 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
             grant.token,
             interaction.oauthToken,
           ]);
-          count({ headers: interaction.headers }, "tool_completed", name);
         } catch (error) {
-          count({ headers: interaction.headers }, "tool_failed", name);
           if (error instanceof PluginError)
             throw new PluginError(
               error.code,
@@ -949,6 +947,8 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       undefined,
       sessionSignal,
       () => reserveWork(id),
+      (name, failed, headers) =>
+        count({ headers }, failed ? "tool_failed" : "tool_completed", name),
     );
   }
   const handleMcp = async (req: Request, res: Response) => {

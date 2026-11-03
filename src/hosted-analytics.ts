@@ -15,6 +15,12 @@ const tools = new Set([
   "infomaniak_search",
   "infomaniak_catalogue",
   "infomaniak_read",
+  "infomaniak_plan",
+  "infomaniak_execute",
+  "infomaniak_operation",
+  "infomaniak_cancel",
+  "infomaniak_docs_search",
+  "infomaniak_docs_read",
 ]);
 export interface HostedAnalytics {
   record(event: Event, tool?: string): void;

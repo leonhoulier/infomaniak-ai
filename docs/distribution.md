@@ -1,6 +1,6 @@
 # Plugin distribution and discovery
 
-Release 0.3.6 adds support and terms pages and corrects the OpenAI listing metadata. Source, plugin ZIPs and checksums are published on GitHub, linked from
+Release 0.3.7 adds anonymous outcome counts for every hosted MCP tool route. Source, plugin ZIPs and checksums are published on GitHub, linked from
 [/plugins](https://infomaniak-mcp.com/plugins). Repository installation and public
 downloads remain separate from directory review and approval.
 
@@ -25,8 +25,8 @@ Build the submission ZIP with:
 node scripts/package-plugin.mjs
 ```
 
-The two archives in `artifacts/` are `infomaniak-plugin-portable-0.3.6.zip` and
-`infomaniak-plugin-openai-0.3.6.zip`. The portable one targets compatible plugin
+The two archives in `artifacts/` are `infomaniak-plugin-portable-0.3.7.zip` and
+`infomaniak-plugin-openai-0.3.7.zip`. The portable one targets compatible plugin
 hosts; the OpenAI variant adds the documented OAuth/DCR submission declaration.
 OpenAI documents an MCP-entry vendor extension that the current strict portable
 MCP schema rejects. Keep that addition confined to the OpenAI variant; validate

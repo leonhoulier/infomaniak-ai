@@ -164,9 +164,10 @@ export function createProtocol(
   docs = documentation,
   sessionSignal?: AbortSignal,
   reserveTool?: () => () => void,
+  onToolOutcome?: (name: string, failed: boolean, headers: ToolInteraction["headers"]) => void,
 ): Server {
   const server = new Server(
-    { name: "infomaniak-ai", version: "0.3.6" },
+    { name: "infomaniak-ai", version: "0.3.7" },
     {
       capabilities: { tools: {} },
       instructions:
@@ -181,6 +182,7 @@ export function createProtocol(
   }));
   server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
     let release: (() => void) | undefined;
+    let failed = true;
     try {
       release = reserveTool?.();
       const signal = sessionSignal ? AbortSignal.any([extra.signal, sessionSignal]) : extra.signal;
@@ -215,8 +217,10 @@ export function createProtocol(
         (await docs.dispatch(request.params.name, request.params.arguments ?? {}, signal)) ??
         (await dispatch(request.params.name, request.params.arguments ?? {}, signal, interaction));
       if (request.params.name === "infomaniak_status") data.documentation = DOCUMENTATION_STATUS;
+      const text = JSON.stringify(data);
+      failed = false;
       return {
-        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+        content: [{ type: "text" as const, text }],
         structuredContent: data,
       };
     } catch (error) {
@@ -237,6 +241,14 @@ export function createProtocol(
         content: [{ type: "text" as const, text: JSON.stringify({ error: true, code, message }) }],
       };
     } finally {
+      try {
+        if (
+          [...API_TOOLS, ...DOCUMENTATION_TOOLS].some((tool) => tool.name === request.params.name)
+        )
+          onToolOutcome?.(request.params.name, failed, extra.requestInfo?.headers ?? {});
+      } catch {
+        // Optional telemetry must never change a tool result or prevent slot release.
+      }
       release?.();
     }
   });
