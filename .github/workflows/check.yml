@@ -1,9 +1,15 @@
 name: Checks
 on:
   push:
+    branches: [main]
   pull_request:
 permissions:
   contents: read
+# Only superseded PR checks are cancelled; every non-PR run keeps its own group.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     strategy:
