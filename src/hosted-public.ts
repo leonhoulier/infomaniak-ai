@@ -32,7 +32,7 @@ export function capabilities(origin: URL, writesEnabled = false, resourceWrites 
   if (writesEnabled && resourceWrites)
     return {
       name: "Infomaniak MCP",
-      version: "0.3.6",
+      version: "0.3.7",
       documentation_access: DOCUMENTATION_STATUS,
       unofficial: true,
       mode: "hosted-resources",
@@ -182,7 +182,7 @@ export function publicPage(
     <p>Encrypted daily backups are kept for seven days. A deleted credential may remain in those backups until they expire. Revoke the API token in Infomaniak to disable any retained copy. To request access, correction or deletion, email the address above. Never send a token by email.</p>
     <h2>Cookies and request data</h2><p>The public website sets no cookies. Sign-in uses only the essential cookies described in our <a href="/cookies">cookie policy</a>. Pages load no external fonts, tracking pixels or session recording scripts. Our small copy-button script runs in your browser and sends nothing.</p>
     <p>The server receives your IP address to handle requests. Application access logs omit IP addresses, query strings, tokens and request bodies. Access logs rotate daily, with up to 14 archives. Container diagnostic logs are limited to three 10 MiB files and expire by rotation rather than a fixed date. Infrastructure providers may process connection metadata to operate the service.</p>
-    <h2>Usage counts</h2><p>${analytics ? "We send limited event counts to PostHog in the EU: homepage views, connection approvals, disconnections and discovery-tool outcomes. They contain no stable visitor identifier, account ID, domain, email, IP address, token, request payload or error text. Each event uses a fresh random ID; no person profile is created. Counts are capped at 1,000 events per UTC day for this installation. We skip these events when a request sends Global Privacy Control or Do Not Track. Counts remain in the analytics project until deleted; they do not form a customer history." : "Usage analytics is disabled on this instance."}</p>
+    <h2>Usage counts</h2><p>${analytics ? "We send limited event counts to PostHog in the EU: homepage views, connection approvals, disconnections and MCP-tool outcomes (discovery, resource reads, write/deployment workflows and documentation). A completed call means the handler returned, not that a provider change was applied. They contain no stable visitor identifier, account ID, domain, email, IP address, token, request payload or error text. Each event uses a fresh random ID; no person profile is created. Counts are capped at 1,000 events per UTC day for this installation. We skip these events when a request sends Global Privacy Control or Do Not Track. Counts remain in the analytics project until deleted; they do not form a customer history." : "Usage analytics is disabled on this instance."}</p>
     <h2>Providers and purposes</h2><p>Infomaniak hosts the service and fulfils your API requests. ${analytics ? "PostHog processes the limited usage counts above. " : ""}Your chosen AI provider receives the tool results you request. We process connection data to provide the service, protect access and diagnose failures. Cloudflare supplies this domain’s registration and DNS; application requests go directly to Infomaniak.</p>
     <p><a class="button" href="/connections">Manage your connection</a></p></div>`,
     );

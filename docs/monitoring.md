@@ -26,6 +26,15 @@ It does not use browser autocapture, session replay or analytics cookies.
 Review `src/hosted-analytics.ts` and the public privacy policy before changing
 the event schema.
 
+Every recognized hosted MCP tool call is counted once at the shared protocol
+boundary, including documentation, resource reads and write/deployment workflows.
+`tool_completed` means the handler returned a result; `tool_failed` means it
+returned an MCP error. A completed cancellation, pending operation or uncertain
+provider result is not proof of an applied change. Unknown tool names are dropped.
+Authentication/HTTP failures before MCP dispatch, JSON API calls and local/stdio
+clients are outside these counts. No internal/test exclusion is applied.
+The same request-level GPC/DNT checks and daily cap apply to every tool outcome.
+
 The service caps capture at 1,000 events per UTC day and bounds the SDK queue and
 request timeout. Delivery failures do not block the application. Counts are not
 unique people or per-user funnels. A service-level event cap is not an
