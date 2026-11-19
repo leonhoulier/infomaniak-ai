@@ -1,11 +1,11 @@
 # Plugin distribution and discovery
 
-The 0.3.8 candidate adds task-focused onboarding, English/French guides and privacy-preserving setup and activity counts. Source, plugin ZIPs and checksums use the existing release path, linked from
+Release 0.3.8 adds task-focused onboarding, English/French guides and privacy-preserving setup and activity counts. Source, plugin ZIPs and checksums use the existing release path, linked from
 [/plugins](https://infomaniak-mcp.com/plugins). Repository installation and public
 downloads remain separate from directory review and approval.
 
-On 29 October 2026, version 0.3.5 was published in the
-[MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.leonhoulier%2Finfomaniak-mcp/versions/0.3.5).
+On 19 November 2026, version 0.3.8 was published in the
+[MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.leonhoulier%2Finfomaniak-mcp/versions/0.3.8).
 Public API readback confirmed the entry is active and points to the hosted
 endpoint. This is a metadata listing, not a client compatibility certification.
 The hosted plugin also passed Claude Code's strict directory validator and a
@@ -48,7 +48,7 @@ a listing in a public directory.
 
 | Surface                  | Prepared input                                                    | Next external step                                                                                                                                       |
 | ------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MCP Registry             | `registry/server.json`; hosted Streamable HTTP, no npm package    | Published and verified active at 0.3.5 on 29 October 2026; update the listing when a new server version is released                                      |
+| MCP Registry             | `registry/server.json`; hosted Streamable HTTP, no npm package    | Published and verified active at 0.3.8 on 19 November 2026; update from a released/deployed tag                                                          |
 | Claude                   | Hosted plugin ZIP and repository marketplace                      | Test a clean native plugin install, publish the marketplace files, then submit through the developer directory portal                                    |
 | ChatGPT and Codex        | OpenAI submission ZIP with OAuth/DCR configuration and onboarding | Verify publisher identity, upload with MCP included, verify domain, connect a dedicated review account, resolve scans, submit and publish after approval |
 | Cursor                   | Portable plugin in a public Git repository                        | Test a clean native installation and OAuth flow, then submit the repository for manual marketplace review                                                |
@@ -147,3 +147,17 @@ stateless VPS apps. [Rollout notes](growth.md) define privacy-preserving metrics
 prepared listing copy and unsent customer-test invitations. A real fresh-client
 recording remains pending. Do not substitute a screenshot, fixture walkthrough
 or demo placeholder for review evidence.
+
+## Registry updates
+
+The manually triggered `Publish released MCP metadata` workflow checks that the
+published GitHub release, tagged metadata and live runtime manifest have the same
+version before publishing. It verifies a pinned publisher's Sigstore bundle and
+uses GitHub OIDC; no persistent publisher token or customer credentials are stored
+in repository secrets. The first successful run published 0.3.8 on 19 November 2026. Main includes publication documentation and this CI helper beyond the
+frozen v0.3.8 runtime source; those follow-ups do not alter the deployed image.
+
+Other portal states above are the latest recorded checks, not fresh verification
+of an approval. Account access, real native-client cases and reviewer materials
+still gate those submissions. Customer invitations in `growth.md` are drafts;
+no outreach has been sent.

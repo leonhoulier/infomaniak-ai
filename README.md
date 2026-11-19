@@ -92,7 +92,7 @@ claude plugin marketplace add leonhoulier/infomaniak-ai
 claude plugin install infomaniak@infomaniak-mcp
 ```
 
-Version 0.3.6 is [published in the MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.leonhoulier%2Finfomaniak-mcp/versions/0.3.6).
+Version 0.3.8 is [published in the MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.leonhoulier%2Finfomaniak-mcp/versions/0.3.8).
 The entry points to the hosted OAuth endpoint; customers do not need an npm
 package. Claude is submitted for review, Cursor has received the publisher application, and OpenAI has an uploaded draft. These are not approved directory listings.
 Repository installation and public downloads are available separately. See the
