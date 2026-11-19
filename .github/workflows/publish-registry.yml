@@ -1,0 +1,59 @@
+name: Publish released MCP metadata
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Published and deployed release tag
+        required: true
+        default: v0.3.8
+        type: string
+permissions:
+  contents: read
+jobs:
+  publish:
+    if: github.repository == 'leonhoulier/infomaniak-ai' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag }}
+      PUBLISHER_VERSION: v1.8.9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag }}
+      - name: Check published source and deployed version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          gh release view "$RELEASE_TAG" --json isDraft --jq 'select(.isDraft == false)' | grep -q isDraft
+          python3 - <<'PY'
+          import json, os, urllib.request
+          expected = os.environ['RELEASE_TAG'][1:]
+          server = json.load(open('registry/server.json'))
+          request = urllib.request.Request('https://infomaniak-mcp.com/releases/latest.json', headers={'Sec-GPC': '1', 'DNT': '1'})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              live = json.load(response)
+          assert server['version'] == live['version'] == expected
+          assert server['name'] == 'io.github.leonhoulier/infomaniak-mcp'
+          assert server['remotes'] == [{'type': 'streamable-http', 'url': 'https://infomaniak-mcp.com/mcp'}]
+          PY
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6
+      - name: Verify the pinned publisher
+        run: |
+          set -euo pipefail
+          file=mcp-publisher_linux_amd64.tar.gz
+          source="https://github.com/modelcontextprotocol/registry/releases/download/$PUBLISHER_VERSION"
+          curl -fsSL "$source/$file" -o "$file"
+          curl -fsSL "$source/$file.sigstore.json" -o "$file.sigstore.json"
+          cosign verify-blob --bundle "$file.sigstore.json" --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/$PUBLISHER_VERSION" "$file"
+          tar -xzf "$file" mcp-publisher
+      - name: Publish with the repository identity
+        working-directory: registry
+        run: |
+          set -euo pipefail
+          ../mcp-publisher login github-oidc
+          ../mcp-publisher publish
