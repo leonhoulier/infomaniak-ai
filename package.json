@@ -1,6 +1,6 @@
 {
   "name": "infomaniak-ai",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "private": true,
   "description": "An unofficial Infomaniak AI plugin with API discovery, scoped reads and independently approved writes.",
   "license": "MIT",
@@ -60,6 +60,7 @@
     "docs/resource-workflows.md",
     "docs/testing.md",
     "docs/write-api.md",
-    "docs/documentation.md"
+    "docs/documentation.md",
+    "docs/growth.md"
   ]
 }

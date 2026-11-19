@@ -24,7 +24,7 @@ import {
 import { ApiError, PublicApi, RequestQueue, list, object, type Api } from "./provider.js";
 import { createReadOnlyFetch } from "./policy.js";
 import { Discovery } from "./discovery.js";
-import { createProtocol } from "./protocol.js";
+import { createProtocol, type ToolInteraction } from "./protocol.js";
 import { PluginError, boundedResult, redact } from "./errors.js";
 import {
   page as documentPage,
@@ -33,7 +33,8 @@ import {
   escapeHtml as e,
   COPY_SCRIPT,
 } from "./hosted-pages.js";
-import { mountClients } from "./hosted-clients.js";
+import { mountClients, SERVICE_VERSION as VERSION } from "./hosted-clients.js";
+import { mountGuides, GUIDE_PATHS } from "./hosted-guides.js";
 import { PUBLIC_PATHS, publicPage, capabilities, agentReference } from "./hosted-public.js";
 import { HostedWrites, verifyWriteZone, TEST_NAME } from "./hosted-writes.js";
 import { handleWriteApi } from "./write-api.js";
@@ -49,7 +50,12 @@ import {
   resourceWords,
   type ResourceConsent,
 } from "./hosted-resources.js";
-import { createHostedAnalytics, type HostedAnalytics } from "./hosted-analytics.js";
+import {
+  createHostedAnalytics,
+  type HostedAnalytics,
+  type Event as AnalyticsEvent,
+  type Detail,
+} from "./hosted-analytics.js";
 
 export interface HostedOptions {
   origin: URL;
@@ -179,6 +185,9 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       else active.delete(id);
     };
   }
+  // Guides describe DNS and deployment workflows that only the resource mode offers.
+  const guides = Boolean(writes && options.resourceWrites);
+  const publicPaths: readonly string[] = [...PUBLIC_PATHS, ...(guides ? GUIDE_PATHS : [])];
   app.disable("x-powered-by");
   // Set only for a deployment whose sole ingress proxy overwrites forwarding headers.
   app.set("trust proxy", options.trustProxyHops ?? 0);
@@ -188,12 +197,8 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       "x-content-type-options": "nosniff",
       // no-referrer turns native form POST Origins into null. Private pages
       // retain same-origin CSRF checks without leaking referrers externally.
-      "referrer-policy": (PUBLIC_PATHS as readonly string[]).includes(req.path)
-        ? "no-referrer"
-        : "same-origin",
-      "x-robots-tag": (PUBLIC_PATHS as readonly string[]).includes(req.path)
-        ? "index, follow"
-        : "noindex, nofollow",
+      "referrer-policy": publicPaths.includes(req.path) ? "no-referrer" : "same-origin",
+      "x-robots-tag": publicPaths.includes(req.path) ? "index, follow" : "noindex, nofollow",
       "content-security-policy": `default-src 'none'; script-src 'sha256-${createHash("sha256").update(COPY_SCRIPT).digest("base64")}'; style-src 'unsafe-inline'; font-src 'self'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'`,
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
     });
@@ -237,13 +242,34 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
         : "hosted-discovery",
     });
   });
+  /**
+   * Optional anonymous counts. GPC/DNT and operator-excluded accounts send nothing.
+   * Events before an account is known can only be excluded by GPC/DNT.
+   */
   const count = (
     req: Pick<Request, "headers">,
-    event: Parameters<HostedAnalytics["record"]>[0],
+    event: AnalyticsEvent,
     tool?: string,
+    context: {
+      accounts?: readonly number[];
+      detail?: Detail;
+      once?: { subject: string; expires: number };
+      active?: string;
+    } = {},
   ) => {
-    if (req.headers["sec-gpc"] !== "1" && req.headers.dnt !== "1")
-      options.analytics?.record(event, tool);
+    try {
+      const analytics = options.analytics;
+      if (!analytics || req.headers["sec-gpc"] === "1" || req.headers.dnt === "1") return;
+      // A throwing exclusion check lands in catch: nothing is sent.
+      if (context.accounts && analytics.excludes?.(context.accounts)) return;
+      if (context.once)
+        analytics.once?.(event, context.once.subject, context.once.expires, context.detail);
+      else if (context.detail) analytics.record(event, tool, context.detail);
+      else analytics.record(event, tool);
+      if (context.active) analytics.active?.(context.active);
+    } catch {
+      /* Analytics never changes a response. */
+    }
   };
   app.get("/", (req, res) => {
     count(req, "homepage_viewed");
@@ -254,6 +280,10 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       );
   });
   mountClients(app, origin, previewNotice);
+  if (guides)
+    mountGuides(app, origin, oauth.resource.href, VERSION, previewNotice, (req, key, lang) =>
+      count(req, "guide_viewed", undefined, { detail: { guide: key, lang } }),
+    );
   app.get("/clients/:client", (req, res, next) => {
     const html = clientGuide(
       String(req.params.client),
@@ -300,11 +330,28 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       );
   });
   app.get("/sitemap.xml", (_req, res) => {
-    res
-      .type("application/xml")
-      .send(
-        `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${PUBLIC_PATHS.map((path) => `<url><loc>${e(new URL(path, origin).href)}</loc></url>`).join("")}</urlset>`,
-      );
+    res.type("application/xml").send(
+      `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${publicPaths
+        .map((path) => {
+          const en = path.replace(/^\/fr\//, "/"),
+            alternates = (GUIDE_PATHS as readonly string[]).includes(path)
+              ? (
+                  [
+                    ["en", en],
+                    ["fr", "/fr" + en],
+                    ["x-default", en],
+                  ] as const
+                )
+                  .map(
+                    ([lang, href]) =>
+                      `<xhtml:link rel="alternate" hreflang="${lang}" href="${e(new URL(href, origin).href)}"/>`,
+                  )
+                  .join("")
+              : "";
+          return `<url><loc>${e(new URL(path, origin).href)}</loc>${alternates}</url>`;
+        })
+        .join("")}</urlset>`,
+    );
   });
   const fontFiles = new Set([
     "IBMPlexSans-Regular.woff2",
@@ -391,6 +438,8 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
   app.get("/connect", (req, res) => {
     const id = typeof req.query.request === "string" ? req.query.request : "";
     const p = pending(req, id);
+    if (!p.accounts)
+      count(req, "connection_started", undefined, { once: { subject: id, expires: p.expires } });
     consentPolicy(res, p);
     res.type("html").send(connectPage(id, p));
   });
@@ -438,9 +487,16 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       live.accounts = accounts;
       live.csrf = opaque();
       store.put("pending", fingerprint(id), live, Math.min(p.expires, now + 5 * 60_000));
+      count(req, "setup_token_accepted", undefined, {
+        accounts: accounts.map((a) => a.id),
+        once: { subject: id, expires: p.expires },
+      });
       consentPolicy(res, live);
       res.type("html").send(connectPage(id, live));
     } catch {
+      count(req, "setup_token_rejected", undefined, {
+        once: { subject: id, expires: p.expires },
+      });
       res
         .status(400)
         .type("html")
@@ -531,7 +587,10 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       );
     }
     const callback = oauth.complete(id, p, account, owner, writeZone, resources);
-    count(req, "connection_approved");
+    count(req, "connection_approved", undefined, {
+      accounts: [account],
+      detail: { access: resources ? "resources" : writeZone ? "disposable_dns" : "read_only" },
+    });
     res.cookie(oauth.manageCookie, browser, {
       httpOnly: true,
       secure: origin.protocol === "https:",
@@ -584,7 +643,7 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
     if (!grant || grant.owner !== owner)
       throw new PluginError("access_denied", "This connection is not available in this browser.");
     oauth.disconnect(id);
-    count(req, "connection_disconnected");
+    count(req, "connection_disconnected", undefined, { accounts: [grant.account] });
     res.redirect(303, "/connections");
   });
   if (writes) {
@@ -785,162 +844,210 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
     }),
   );
   const mcp = new HostedMcp((id) => Boolean(store.get<Grant>("grant", id)?.activated), store.now);
+  /** Count first activation and final write outcomes from returned results only. */
+  function observeTool(
+    id: string,
+    grant: Grant,
+    name: string,
+    args: unknown,
+    result: Record<string, unknown>,
+    headers: ToolInteraction["headers"],
+  ): void {
+    const context = { accounts: [grant.account] };
+    if (name === "infomaniak_read") {
+      count({ headers }, "connection_activated", undefined, {
+        ...context,
+        detail: { operation: String(object(args).operation ?? "") },
+        once: { subject: id, expires: grant.expires },
+      });
+      return;
+    }
+    if (name !== "infomaniak_execute" && name !== "infomaniak_operation") return;
+    const plan = object(result.plan);
+    if (typeof plan.id !== "string" || typeof plan.operation !== "string") return;
+    const prefix = plan.operation.split(".")[0] ?? "",
+      kind = ["dns", "mail", "deployment"].includes(prefix) ? prefix : "other",
+      // Plans stay in history for 7 days after their last update; outlive that.
+      once = { subject: plan.id, expires: store.now() + 15 * 86_400_000 };
+    if (plan.state === "verified")
+      count({ headers }, "write_verified", undefined, { ...context, detail: { kind }, once });
+    else if (plan.state === "failed" || plan.state === "unknown")
+      count({ headers }, "write_not_verified", undefined, {
+        ...context,
+        detail: { kind, state: plan.state },
+        once,
+      });
+  }
   function connectionProtocol(id: string, initialGrant: Grant, sessionSignal?: AbortSignal) {
-    return createProtocol(
-      async (name, args, signal, interaction) => {
-        let grant = store.get<Grant>("grant", id);
+    const run = async (
+      name: string,
+      args: unknown,
+      signal: AbortSignal,
+      interaction: ToolInteraction,
+    ): Promise<Record<string, unknown>> => {
+      let grant = store.get<Grant>("grant", id);
+      if (!grant?.activated)
+        throw new PluginError("access_denied", "This connection was disconnected.");
+      if (name === "infomaniak_execute" && interaction.confirmWrite && nativeApproval) {
+        const input = z
+          .object({ plan_id: z.string().uuid(), plan_hash: z.string().regex(/^[a-f0-9]{64}$/) })
+          .strict()
+          .parse(args);
+        const review = () => {
+          const fresh = store.get<Grant>("grant", id);
+          if (!fresh?.activated || !canWrite(fresh))
+            throw new PluginError(
+              "access_denied",
+              "This connection no longer permits this change.",
+            );
+          const saved = writes!.journal.get(input.plan_id, id);
+          return saved.operation.startsWith("deployment.")
+            ? deployments!.review(id, fresh, input.plan_id, input.plan_hash)
+            : writes!.review(id, fresh, input.plan_id, input.plan_hash);
+        };
+        const plan = await nativeApproval.confirm(
+          review,
+          interaction.confirmWrite,
+          signal,
+          new URL("/write-reviews/" + input.plan_id, origin).href,
+        );
+        if (plan.state === "cancelled") return { plan, provider_mutation_sent: false };
+        grant = store.get<Grant>("grant", id);
         if (!grant?.activated)
           throw new PluginError("access_denied", "This connection was disconnected.");
-        if (name === "infomaniak_execute" && interaction.confirmWrite && nativeApproval) {
-          const input = z
-            .object({ plan_id: z.string().uuid(), plan_hash: z.string().regex(/^[a-f0-9]{64}$/) })
-            .strict()
-            .parse(args);
-          const review = () => {
-            const fresh = store.get<Grant>("grant", id);
-            if (!fresh?.activated || !canWrite(fresh))
-              throw new PluginError(
-                "access_denied",
-                "This connection no longer permits this change.",
-              );
-            const saved = writes!.journal.get(input.plan_id, id);
-            return saved.operation.startsWith("deployment.")
-              ? deployments!.review(id, fresh, input.plan_id, input.plan_hash)
-              : writes!.review(id, fresh, input.plan_id, input.plan_hash);
-          };
-          const plan = await nativeApproval.confirm(
-            review,
-            interaction.confirmWrite,
-            signal,
-            new URL("/write-reviews/" + input.plan_id, origin).href,
-          );
-          if (plan.state === "cancelled") return { plan, provider_mutation_sent: false };
-          grant = store.get<Grant>("grant", id);
-          if (!grant?.activated)
-            throw new PluginError("access_denied", "This connection was disconnected.");
-        }
-        if (
-          deployments &&
-          [
-            "infomaniak_plan",
-            "infomaniak_execute",
-            "infomaniak_operation",
-            "infomaniak_cancel",
-            "infomaniak_read",
-          ].includes(name) &&
-          isDeployment(id, args)
-        ) {
-          const result = await deployments.dispatch(id, grant, name, args, signal);
-          return {
-            ...result,
-            ...(name === "infomaniak_plan"
-              ? {
-                  approval_url: new URL("/write-reviews/" + (result.plan as Plan).id, origin).href,
-                  approval_method: interaction.confirmWrite ? "client" : "browser",
-                  next_step: interaction.confirmWrite
-                    ? "Call infomaniak_execute with this exact plan id and hash. The client will ask the user to confirm before execution."
-                    : "Open approval_url in the consenting browser before execution.",
-                }
-              : {}),
-          };
-        }
-        if (
-          [
-            "infomaniak_plan",
-            "infomaniak_execute",
-            "infomaniak_operation",
-            "infomaniak_cancel",
-          ].includes(name) &&
-          writes?.hasAccess(grant)
-        ) {
-          const result = await writes.dispatch(id, grant, name, args, signal);
-          return {
-            ...result,
-            ...(name === "infomaniak_plan"
-              ? {
-                  approval_url: new URL("/write-reviews/" + (result.plan as Plan).id, origin).href,
-                  approval_method: interaction.confirmWrite ? "client" : "browser",
-                  next_step: interaction.confirmWrite
-                    ? "Call infomaniak_execute with this exact plan id and hash. The client will ask the user to confirm before execution."
-                    : "Open approval_url in the consenting browser before execution.",
-                }
-              : {}),
-          };
-        }
-        if (
-          name === "infomaniak_read" &&
-          writes?.hasAccess(grant) &&
-          !["accounts.list", "products.list", "resources.resolve"].includes(
-            String(object(args).operation),
-          )
+      }
+      if (
+        deployments &&
+        [
+          "infomaniak_plan",
+          "infomaniak_execute",
+          "infomaniak_operation",
+          "infomaniak_cancel",
+          "infomaniak_read",
+        ].includes(name) &&
+        isDeployment(id, args)
+      ) {
+        const result = await deployments.dispatch(id, grant, name, args, signal);
+        return {
+          ...result,
+          ...(name === "infomaniak_plan"
+            ? {
+                approval_url: new URL("/write-reviews/" + (result.plan as Plan).id, origin).href,
+                approval_method: interaction.confirmWrite ? "client" : "browser",
+                next_step: interaction.confirmWrite
+                  ? "Call infomaniak_execute with this exact plan id and hash. The client will ask the user to confirm before execution."
+                  : "Open approval_url in the consenting browser before execution.",
+              }
+            : {}),
+        };
+      }
+      if (
+        [
+          "infomaniak_plan",
+          "infomaniak_execute",
+          "infomaniak_operation",
+          "infomaniak_cancel",
+        ].includes(name) &&
+        writes?.hasAccess(grant)
+      ) {
+        const result = await writes.dispatch(id, grant, name, args, signal);
+        return {
+          ...result,
+          ...(name === "infomaniak_plan"
+            ? {
+                approval_url: new URL("/write-reviews/" + (result.plan as Plan).id, origin).href,
+                approval_method: interaction.confirmWrite ? "client" : "browser",
+                next_step: interaction.confirmWrite
+                  ? "Call infomaniak_execute with this exact plan id and hash. The client will ask the user to confirm before execution."
+                  : "Open approval_url in the consenting browser before execution.",
+              }
+            : {}),
+        };
+      }
+      if (
+        name === "infomaniak_read" &&
+        writes?.hasAccess(grant) &&
+        !["accounts.list", "products.list", "resources.resolve"].includes(
+          String(object(args).operation),
         )
-          return writes.dispatch(id, grant, name, args, signal);
-        const discovery = await Discovery.create(grant.token, api(grant.token), [grant.account]);
-        let result: Record<string, unknown>;
-        try {
-          result = boundedResult(await discovery.dispatch(name, args), [
-            grant.token,
-            interaction.oauthToken,
-          ]);
-        } catch (error) {
-          if (error instanceof PluginError)
-            throw new PluginError(
-              error.code,
-              String(redact(error.message, [grant.token, interaction.oauthToken])),
-            );
-          throw error;
-        }
-        if (name === "infomaniak_search" && canWrite(grant)) {
-          const input = object(args),
-            query = String(input.query ?? "").toLowerCase();
-          const descriptors = [
-            ...(writes?.hasAccess(grant) ? writes.descriptors(grant) : []),
-            ...(deployments?.descriptors(grant) ?? []),
-          ].filter((d) =>
-            query
-              .split(/\s+/)
-              .some((word) =>
-                (String(d.operation) + " " + String(d.summary)).toLowerCase().includes(word),
-              ),
+      )
+        return writes.dispatch(id, grant, name, args, signal);
+      const discovery = await Discovery.create(grant.token, api(grant.token), [grant.account]);
+      let result: Record<string, unknown>;
+      try {
+        result = boundedResult(await discovery.dispatch(name, args), [
+          grant.token,
+          interaction.oauthToken,
+        ]);
+      } catch (error) {
+        if (error instanceof PluginError)
+          throw new PluginError(
+            error.code,
+            String(redact(error.message, [grant.token, interaction.oauthToken])),
           );
-          result = {
-            ...result,
-            operations: [...descriptors, ...list(result.operations)].slice(
-              0,
-              Number(input.limit) || 3,
+        throw error;
+      }
+      if (name === "infomaniak_search" && canWrite(grant)) {
+        const input = object(args),
+          query = String(input.query ?? "").toLowerCase();
+        const descriptors = [
+          ...(writes?.hasAccess(grant) ? writes.descriptors(grant) : []),
+          ...(deployments?.descriptors(grant) ?? []),
+        ].filter((d) =>
+          query
+            .split(/\s+/)
+            .some((word) =>
+              (String(d.operation) + " " + String(d.summary)).toLowerCase().includes(word),
             ),
-          };
-        }
-        return name === "infomaniak_status"
-          ? {
-              ...result,
-              ...(writes?.hasAccess(grant) ? writes.status(grant) : {}),
-              ...(grant.scopes?.includes(DEPLOY_SCOPE)
+        );
+        result = {
+          ...result,
+          operations: [...descriptors, ...list(result.operations)].slice(
+            0,
+            Number(input.limit) || 3,
+          ),
+        };
+      }
+      return name === "infomaniak_status"
+        ? {
+            ...result,
+            ...(writes?.hasAccess(grant) ? writes.status(grant) : {}),
+            ...(grant.scopes?.includes(DEPLOY_SCOPE)
+              ? {
+                  deployment_enabled: Boolean(deployments?.hasAccess(grant)),
+                  deployment_apps: grant.resources?.deployments ?? [],
+                  runner_setup_url: new URL("/runners", origin).href,
+                  available_deployments: deployments?.descriptors(grant) ?? [],
+                }
+              : {}),
+            hosted: true,
+            approval_method: interaction.confirmWrite ? "client" : "browser",
+            writes_enabled: canWrite(grant),
+            account_id: grant.account,
+            ...(deployments?.hasAccess(grant)
+              ? {
+                  next_step:
+                    "Inspect a paired app with deployment.app.get, then prepare deployment.release for a pinned commit. Follow the plan confirmation instructions before execution.",
+                }
+              : !writes?.hasAccess(grant)
                 ? {
-                    deployment_enabled: Boolean(deployments?.hasAccess(grant)),
-                    deployment_apps: grant.resources?.deployments ?? [],
-                    runner_setup_url: new URL("/runners", origin).href,
-                    available_deployments: deployments?.descriptors(grant) ?? [],
+                    next_step: grant.scopes?.includes(DEPLOY_SCOPE)
+                      ? "Open runner_setup_url in the consenting browser to pair your customer-owned deployment runner."
+                      : "This connection can inspect its account and products. Connect again to grant named DNS or mailbox resources.",
                   }
                 : {}),
-              hosted: true,
-              approval_method: interaction.confirmWrite ? "client" : "browser",
-              writes_enabled: canWrite(grant),
-              account_id: grant.account,
-              ...(deployments?.hasAccess(grant)
-                ? {
-                    next_step:
-                      "Inspect a paired app with deployment.app.get, then prepare deployment.release for a pinned commit. Follow the plan confirmation instructions before execution.",
-                  }
-                : !writes?.hasAccess(grant)
-                  ? {
-                      next_step: grant.scopes?.includes(DEPLOY_SCOPE)
-                        ? "Open runner_setup_url in the consenting browser to pair your customer-owned deployment runner."
-                        : "This connection can inspect its account and products. Connect again to grant named DNS or mailbox resources.",
-                    }
-                  : {}),
-            }
-          : result;
+          }
+        : result;
+    };
+    return createProtocol(
+      async (name, args, signal, interaction) => {
+        const result = await run(name, args, signal, interaction);
+        try {
+          observeTool(id, initialGrant, name, args, result, interaction.headers);
+        } catch {
+          /* Telemetry never changes a tool result. */
+        }
+        return result;
       },
       canWrite(initialGrant) || Boolean(initialGrant.scopes?.includes(DEPLOY_SCOPE)),
       !(canWrite(initialGrant) || Boolean(initialGrant.scopes?.includes(DEPLOY_SCOPE))),
@@ -948,7 +1055,10 @@ export function createHosted(options: HostedOptions): { server: Server; oauth: H
       sessionSignal,
       () => reserveWork(id),
       (name, failed, headers) =>
-        count({ headers }, failed ? "tool_failed" : "tool_completed", name),
+        count({ headers }, failed ? "tool_failed" : "tool_completed", name, {
+          accounts: [initialGrant.account],
+          ...(failed ? {} : { active: id }),
+        }),
     );
   }
   const handleMcp = async (req: Request, res: Response) => {

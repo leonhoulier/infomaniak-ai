@@ -284,3 +284,13 @@ Existing JSON API clients still approve through the browser; there is no generic
 approval endpoint or model-accessible approval tool. Old clients without form
 support retain their stateless path. Native UI qualification is recorded separately
 from protocol fixtures and capability negotiation.
+
+## Usage measurement
+
+Optional analytics counts setup, first successful reads, all MCP tool outcomes,
+observed write verification and weekly active connections. It does not identify
+visitors or establish customer retention. See [measurement definitions and
+rollout drafts](growth.md) for event meanings, limits and operator/reviewer
+exclusions. Set `INFOMANIAK_ANALYTICS_EXCLUDED_ACCOUNTS` in the private deployment
+environment; both hosted Compose variants pass it through. GPC/DNT suppress
+request events and weekly markers, including anonymous operator page visits.

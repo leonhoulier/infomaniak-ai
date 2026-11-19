@@ -5,6 +5,7 @@ const { version } = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 ) as { version: string };
 import { page, escapeHtml as e } from "./hosted-pages.js";
+export const SERVICE_VERSION = version;
 
 // Compatibility is evidence, not a promise inferred from the MCP protocol.
 export const CLIENT_QUALIFICATION = {

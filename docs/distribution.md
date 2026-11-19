@@ -1,6 +1,6 @@
 # Plugin distribution and discovery
 
-Release 0.3.7 adds anonymous outcome counts for every hosted MCP tool route. Source, plugin ZIPs and checksums are published on GitHub, linked from
+The 0.3.8 candidate adds task-focused onboarding, English/French guides and privacy-preserving setup and activity counts. Source, plugin ZIPs and checksums use the existing release path, linked from
 [/plugins](https://infomaniak-mcp.com/plugins). Repository installation and public
 downloads remain separate from directory review and approval.
 
@@ -25,8 +25,8 @@ Build the submission ZIP with:
 node scripts/package-plugin.mjs
 ```
 
-The two archives in `artifacts/` are `infomaniak-plugin-portable-0.3.7.zip` and
-`infomaniak-plugin-openai-0.3.7.zip`. The portable one targets compatible plugin
+The two archives in `artifacts/` are `infomaniak-plugin-portable-0.3.8.zip` and
+`infomaniak-plugin-openai-0.3.8.zip`. The portable one targets compatible plugin
 hosts; the OpenAI variant adds the documented OAuth/DCR submission declaration.
 OpenAI documents an MCP-entry vendor extension that the current strict portable
 MCP schema rejects. Keep that addition confined to the OpenAI variant; validate
@@ -138,3 +138,12 @@ browser/native OAuth, scoped preview/refusal/cancel/disconnect, real model statu
 and documentation calls, HTTPS and exact runtime-download checks. Its authorised
 TXT test expired without execution. Those results remain prior-release evidence
 for this candidate's changed confirmation flow.
+
+## Task-focused rollout
+
+[English guides](https://infomaniak-mcp.com/guides) and
+[French guides](https://infomaniak-mcp.com/fr/guides) cover connection, DNS and
+stateless VPS apps. [Rollout notes](growth.md) define privacy-preserving metrics,
+prepared listing copy and unsent customer-test invitations. A real fresh-client
+recording remains pending. Do not substitute a screenshot, fixture walkthrough
+or demo placeholder for review evidence.

@@ -1,6 +1,6 @@
 # Infomaniak MCP
 
-Use your AI coding tools with the Infomaniak services you already run.
+Check your Infomaniak DNS from Claude Code, then manage the services you already run.
 Independent, unofficial and open source. Built by [Léon Houlier](https://leonhoulier.com).
 
 **[Try the hosted pilot](https://infomaniak-mcp.com)** ·
@@ -26,7 +26,20 @@ their own Infomaniak token on a private page and approves one account. Never
 paste a token into chat or a GitHub issue. Native client onboarding is still
 being qualified.
 
-Ask: **“Show my Infomaniak services.”**
+First, name the domain to audit on the private consent page. Replace `example.com`:
+
+> Use Infomaniak to run a read-only DNS audit of example.com. Explain each SPF,
+> DKIM, DMARC and MX finding in plain language. Do not prepare or make any change.
+
+The audit only reads. Naming a domain also permits change previews; every write
+still needs your confirmation. A discovery-only connection cannot run this audit.
+Follow the [Claude Code guide](https://infomaniak-mcp.com/guides/claude-code),
+[inspect/change DNS](https://infomaniak-mcp.com/guides/dns-records), or
+[deploy/roll back a VPS app](https://infomaniak-mcp.com/guides/vps-deploy).
+[Ces guides sont aussi disponibles en français](https://infomaniak-mcp.com/fr/guides).
+
+A fresh-client walkthrough recording is still pending. The guides describe the
+implemented workflow; automated fixture tests do not establish native client acceptance.
 
 | Capability             | Hosted service today                                                                                                                   |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -79,7 +92,7 @@ claude plugin marketplace add leonhoulier/infomaniak-ai
 claude plugin install infomaniak@infomaniak-mcp
 ```
 
-Version 0.3.5 is [published in the MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.leonhoulier%2Finfomaniak-mcp/versions/0.3.5).
+Version 0.3.6 is [published in the MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.leonhoulier%2Finfomaniak-mcp/versions/0.3.6).
 The entry points to the hosted OAuth endpoint; customers do not need an npm
 package. Claude is submitted for review, Cursor has received the publisher application, and OpenAI has an uploaded draft. These are not approved directory listings.
 Repository installation and public downloads are available separately. See the

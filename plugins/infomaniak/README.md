@@ -31,7 +31,15 @@ consent page. Enter the provider token there, never in chat. The independent
 service encrypts it at rest; the operator holds the encryption key. Your AI
 application receives a separate OAuth credential. You can choose read-only.
 
-Ask: **Show my Infomaniak services and what this connection can manage.**
+Start with the [Claude Code DNS audit guide](https://infomaniak-mcp.com/guides/claude-code)
+([en français](https://infomaniak-mcp.com/fr/guides/claude-code)). Approve a domain,
+replace `example.com` and ask:
+
+> Use Infomaniak to run a read-only DNS audit of example.com. Explain each SPF,
+> DKIM, DMARC and MX finding in plain language. Do not prepare or make any change.
+
+The audit only reads. Domain consent also permits change previews, with separate
+confirmation required for every write. Discovery-only access cannot run the audit.
 
 ## Workflows
 

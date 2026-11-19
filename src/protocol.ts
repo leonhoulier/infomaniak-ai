@@ -167,7 +167,7 @@ export function createProtocol(
   onToolOutcome?: (name: string, failed: boolean, headers: ToolInteraction["headers"]) => void,
 ): Server {
   const server = new Server(
-    { name: "infomaniak-ai", version: "0.3.7" },
+    { name: "infomaniak-ai", version: "0.3.8" },
     {
       capabilities: { tools: {} },
       instructions:

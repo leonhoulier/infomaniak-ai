@@ -17,6 +17,7 @@ services:
       INFOMANIAK_HOSTED_RESOURCE_WRITES: ${INFOMANIAK_AI_RESOURCE_WRITES:-true}
       POSTHOG_PROJECT_TOKEN: ${POSTHOG_PROJECT_TOKEN:-}
       POSTHOG_HOST: ${POSTHOG_HOST:-}
+      INFOMANIAK_ANALYTICS_EXCLUDED_ACCOUNTS: ${INFOMANIAK_ANALYTICS_EXCLUDED_ACCOUNTS:-}
     volumes:
       - ${INFOMANIAK_AI_HOSTED_PRIVATE_DIR:?Set a private absolute directory}/hosted-key:/run/secrets/hosted-key:ro
       - ${INFOMANIAK_AI_HOSTED_PRIVATE_DIR}/state:/var/lib/infomaniak-ai-hosted

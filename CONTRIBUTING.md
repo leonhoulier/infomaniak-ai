@@ -3,7 +3,7 @@
 Contributions are welcome. Start with a reproducible bug, a client compatibility
 check, a documentation correction or a small Infomaniak operation. Use an issue
 to discuss larger changes before writing them. You do not need an Infomaniak
-account to run the fixture tests.
+account to run the fixture tests. Start with [one small contribution](docs/contributor-tasks.md).
 
 Keep provider fixes in the upstream MCP where possible. This repository owns the
 plugin interface, capability policy, skills and cross-product workflows.

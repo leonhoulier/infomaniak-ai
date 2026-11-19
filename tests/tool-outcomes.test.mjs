@@ -1,22 +1,28 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { randomBytes } from "node:crypto";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { API_TOOLS, DOCUMENTATION_TOOLS, createProtocol } from "../dist/protocol.js";
 import { createHostedAnalytics } from "../dist/hosted-analytics.js";
+import { HostedStore } from "../dist/hosted-store.js";
 import { PluginError } from "../dist/errors.js";
 import { hostedFixture } from "./fixtures/hosted.mjs";
 
 test("every registered MCP tool exports one anonymous outcome, including docs and failures", async (t) => {
   const captured = [],
-    budget = new Map();
+    directory = await mkdtemp(join(tmpdir(), "ik-tool-outcomes-")),
+    store = new HostedStore(directory, randomBytes(32));
+  t.after(async () => {
+    store.close();
+    await rm(directory, { recursive: true, force: true });
+  });
   const analytics = createHostedAnalytics(
-    {
-      now: () => Date.now(),
-      get: (_, key) => budget.get(key),
-      put: (_, key, value) => budget.set(key, value),
-    },
+    store,
     { POSTHOG_PROJECT_TOKEN: "phc_fixture", POSTHOG_HOST: "https://eu.i.posthog.com" },
     () => ({ on() {}, capture: (event) => captured.push(event), shutdown: async () => {} }),
   );
