@@ -351,6 +351,3 @@ export function mountGuides(
       });
   }
 }
-export const GUIDE_TITLES = Object.fromEntries(
-  KEYS.map((key) => [key, GUIDES.en[key].title]),
-) as Record<GuideKey, string>;
