@@ -17,7 +17,6 @@ import {
 import { ApiError, list, object, type Api } from "./provider.js";
 import { DNS_SCOPE, MAIL_SCOPE, verifyMailbox } from "./hosted-resources.js";
 
-export { WRITE_SCOPE } from "./hosted-oauth.js";
 export const TEST_NAME = "_infomaniak-ai-test";
 export const DNS_WRITES = ["dns.record.create", "dns.record.update", "dns.record.delete"] as const;
 const terminal = new Set<State>(["verified", "failed", "stale", "cancelled"]);
