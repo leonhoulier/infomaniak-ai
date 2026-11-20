@@ -6,7 +6,6 @@ import { list, object, type Api } from "./provider.js";
 export const DNS_SCOPE = "infomaniak:write:dns";
 export const MAIL_SCOPE = "infomaniak:write:mail";
 export const DEPLOY_SCOPE = "infomaniak:deploy";
-export const RESOURCE_SCOPES = [DNS_SCOPE, MAIL_SCOPE, DEPLOY_SCOPE];
 export interface MailboxResource {
   hosting: number;
   name: string;
